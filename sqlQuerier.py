@@ -41,8 +41,8 @@ teams = [
 """
 
 with sqlite3.connect('baseballStats.db') as statsDb:
-    thisStatsScraper = webScraper.statsScraper()
-    baltimoreOriolesPitcherStats = thisStatsScraper.getBaseballTeamPitcherStats("Texas", "2023")
+    thisBaseballStatsScraper = webScraper.baseballStatsScraper()
+    baltimoreOriolesPitcherStats = thisBaseballStatsScraper.getBaseballTeamPitcherStats("Baltimore", "2023")
     
     #statsDb.execute(createPitcherTable)
     #statsDb.execute(createTeamsTable)

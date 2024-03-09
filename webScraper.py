@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 import inspect
+from abc import ABC, abstractmethod 
 
 
 """
@@ -11,57 +12,44 @@ for header in statsTableHeaders:
     headerNames.append(header.text)
 #print(headerNames)
 """
-class statsScraper:
-    __URL_BASEBALL_STATS = "https://www.baseball-reference.com"
-    __URL_BASKETBALL_STATS = "https://www.basketball-reference.com"
-    __STR_BASEBALL = "Baseball"
-    __STR_BASKETBALL = "Basketball"
+class statsScraper(ABC):
+    _STR_BASEBALL = "Baseball"
+    _STR_BASKETBALL = "Basketball"
     
-    def __init__(self) -> None:
-        pass
-    
+    def __init__(self, urlStats, teamAbreviations, urlExtension) -> None:
+        self._urlStats = urlStats
+        self._teamAbreviations = teamAbreviations
+        self._urlExtension = urlExtension
                 
-    def __getSoupTeamStats(self, sport, city, year):
-        ####todo scrape based on team param
+    def _getSoupTeamStats(self, city, year):
         url = ""
-        match sport:
-            case statsScraper.__STR_BASEBALL:
-                url = url + statsScraper.__URL_BASEBALL_STATS
-            case statsScraper.__STR_BASKETBALL:
-                url = url + statsScraper.__URL_BASKETBALL_STATS
-            case _:
-                nameOfEnclosingFunc = inspect.stack()[0][3]
-                statsScraper.__raiseErrorInvalidArg(nameOfEnclosingFunc)
-        
+        url = url + self._urlStats
         url = url + "/teams/"
-        
-        match city:
-            case "Baltimore":
-                url = url + "BAL"
-            case "Texas":
-                url = url + "TEX"
-            case _:
-                nameOfEnclosingFunc = inspect.stack()[0][3]
-                statsScraper.__raiseErrorInvalidArg(nameOfEnclosingFunc)
-                
+        url = url + self._teamAbreviations[city]
         url = url + f"/{year}"
-            
-        match sport:
-            case statsScraper.__STR_BASEBALL:
-                url = url + ".shtml"
-            case statsScraper.__STR_BASKETBALL:
-                url = url + ".html"
-            case _:
-                nameOfEnclosingFunc = inspect.stack()[0][3]
-                statsScraper.__raiseErrorInvalidArg(nameOfEnclosingFunc)    
-            
+        url = url + self._urlExtension 
+    
         r = requests.get(url)
         #print(r)
         soup = BeautifulSoup(r.text, "html.parser")
         return soup
     
+    @classmethod
+    def _raiseErrorInvalidArg(nameOfEnclosingFunc):
+        raise ValueError(f"argument provided to function '{nameOfEnclosingFunc}'' invalid")
+
+class baseballStatsScraper(statsScraper):
+    def __init__(self):
+        urlStats = "https://www.baseball-reference.com"
+        teamAbreviations = dict([
+            ("Baltimore", "BAL"),
+            ("Texas", "TEX")
+        ])
+        urlExtension = ".shtml"
+        super().__init__(urlStats, teamAbreviations, urlExtension)
+
     def getBaseballTeamPitcherStats(self, city, year):
-        soup = self.__getSoupTeamStats(statsScraper.__STR_BASEBALL, city, year)
+        soup = self._getSoupTeamStats(city, year)
         statsTable = soup.find("table", id="team_batting")
         pitchersRows = []  
         statsTableRows = statsTable.findAll("tr")
@@ -91,6 +79,14 @@ class statsScraper:
         """
         return pitchersStats
 
-    @classmethod
-    def __raiseErrorInvalidArg(nameOfEnclosingFunc):
-        raise ValueError(f'argument provided to function "{nameOfEnclosingFunc}" invalid')
+class basketballStatsScraper(statsScraper):
+    def __init__(self):
+        urlStats = "https://www.basketball-reference.com"
+        teamAbreviations = dict(
+            ("Boston", "BOS"),
+            ("Philadelphia", "PHI")
+        )
+        urlExtension = ".html"
+        super().__init__(urlStats, teamAbreviations, urlExtension)
+
+        
