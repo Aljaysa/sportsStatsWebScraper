@@ -4,14 +4,6 @@ from bs4 import BeautifulSoup
 import inspect
 from abc import ABC, abstractmethod 
 
-
-"""
-statsTableHeaders = statsTable.findAll("th")
-headerNames = []
-for header in statsTableHeaders:
-    headerNames.append(header.text)
-#print(headerNames)
-"""
 class statsScraper(ABC):
     _STR_BASEBALL = "Baseball"
     _STR_BASKETBALL = "Basketball"
@@ -33,12 +25,15 @@ class statsScraper(ABC):
         #print(r)
         soup = BeautifulSoup(r.text, "html.parser")
         return soup
+        
     
     @classmethod
     def _raiseErrorInvalidArg(nameOfEnclosingFunc):
         raise ValueError(f"argument provided to function '{nameOfEnclosingFunc}'' invalid")
 
 class baseballStatsScraper(statsScraper):
+    _POS_PLAYER_ABREV = ["C", "1B", "2B", "SS", "3B", "LF", "CF", "RF", "DH", "UT", "OF", "IF", "DH"]
+    _PITCHER_ABREV = "P"
     def __init__(self):
         urlStats = "https://www.baseball-reference.com"
         teamAbreviations = dict([
@@ -48,36 +43,49 @@ class baseballStatsScraper(statsScraper):
         urlExtension = ".shtml"
         super().__init__(urlStats, teamAbreviations, urlExtension)
 
+
     def getBaseballTeamPitcherStats(self, city, year):
+        tableID = "team_pitching"
+        return self._getBaseballTeamStats(city, year, tableID)
+        
+    def getBaseballTeamBatterStats(self, city, year):
+        tableID = "team_batting"
+        return self._getBaseballTeamStats(city, year, tableID, ["P"]) 
+         
+    def _getBaseballTeamStats(self, city, year, tableID, posToOmit=[]):
         soup = self._getSoupTeamStats(city, year)
-        statsTable = soup.find("table", id="team_batting")
-        pitchersRows = []  
-        statsTableRows = statsTable.findAll("tr")
-        for row in statsTableRows[1:]:
+        fullStatsTable = soup.find("table", id=tableID)
+        justPlayersStatsTable = fullStatsTable.find("tbody")
+        playersRows = justPlayersStatsTable.findAll("tr", class_=lambda x : x != "thead")
+        #print(playersRows)
+        if posToOmit: #if list is not empty
+            playersRowsPosOmitted = []
             try:
-                pos = row.find("td")
-                #print(pos.string)
-                if(pos.string == "P"):
-                    pitchersRows.append(row)
+                for row in playersRows:
+                    pos = row.find("td", {'data-stat':'pos'})
+                    #print(pos.string)
+                    if(pos.string not in posToOmit):
+                        playersRowsPosOmitted.append(row) 
+                playersRows = playersRowsPosOmitted
             except AttributeError:
                 pass
         
-        pitchersStats = []
-        for pitcher in pitchersRows:
-            tempPitcher = ()
-            name = pitcher.find("td",{'data-stat':'player'})
-            tempPitcher = (*tempPitcher, name.text)
+        playersStats = []
+        for player in playersRows:
+            tempPlayer = ()
+            name = player.find("td",{'data-stat':'player'})
+            tempPlayer = (*tempPlayer, name.text)
             #print(pitcherName.text) 
-            age = pitcher.find("td",{'data-stat':'age'})
-            tempPitcher = (*tempPitcher, age.text)
-            games = pitcher.find("td",{'data-stat':'G'})
-            tempPitcher = (*tempPitcher, games.text)
-            pitchersStats.append(tempPitcher)
-        """
-        for pitcher in pitchersStats:
-            print(pitcher)
-        """
-        return pitchersStats
+            age = player.find("td",{'data-stat':'age'})
+            tempPlayer = (*tempPlayer, age.text)
+            games = player.find("td",{'data-stat':'G'})
+            tempPlayer = (*tempPlayer, games.text)
+            playersStats.append(tempPlayer)
+ 
+        return playersStats
+    
+    #def getPlayersRowsPosOmitted()
+    
 
 class basketballStatsScraper(statsScraper):
     def __init__(self):
