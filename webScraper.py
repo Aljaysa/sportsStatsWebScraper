@@ -26,6 +26,38 @@ class statsScraper(ABC):
         soup = BeautifulSoup(r.text, "html.parser")
         return soup
         
+    def _getStatsFromTable(self, city, year, tableID, posToOmit=[]):
+        soup = self._getSoupTeamStats(city, year)
+        fullStatsTable = soup.find("table", id=tableID)
+        justPlayersStatsTable = fullStatsTable.find("tbody")
+        playersRows = justPlayersStatsTable.findAll("tr", class_=lambda x : x != "thead")
+        #print(playersRows)
+        if posToOmit: #if list is not empty
+            playersRowsPosOmitted = []
+            try:
+                for row in playersRows:
+                    pos = row.find("td", {'data-stat':'pos'})
+                    #print(pos.string)
+                    if(pos.string not in posToOmit):
+                        playersRowsPosOmitted.append(row) 
+                playersRows = playersRowsPosOmitted
+            except AttributeError:
+                pass    
+    
+        thisPlayerStats = []
+        for thisPlayer in playersRows:
+            
+            tempPlayer = ()
+            name = player.find("td",{'data-stat':'player'})
+            tempPlayer = (*tempPlayer, name.text)
+            #print(pitcherName.text)
+            age = player.find("td",{'data-stat':'age'})
+            tempPlayer = (*tempPlayer, age.text)
+            games = player.find("td",{'data-stat':'G'})
+            tempPlayer = (*tempPlayer, games.text)
+            playersStats.append(tempPlayer)
+ 
+        return playersStats    
     
     @classmethod
     def _raiseErrorInvalidArg(nameOfEnclosingFunc):
@@ -44,57 +76,28 @@ class baseballStatsScraper(statsScraper):
         super().__init__(urlStats, teamAbreviations, urlExtension)
 
 
-    def getBaseballTeamPitcherStats(self, city, year):
+    def getTeamPitcherStats(self, city, year):
         tableID = "team_pitching"
-        return self._getBaseballTeamStats(city, year, tableID)
+        return self._getStatsFromTable(city, year, tableID)
         
-    def getBaseballTeamBatterStats(self, city, year):
+    def getTeamBatterStats(self, city, year):
         tableID = "team_batting"
-        return self._getBaseballTeamStats(city, year, tableID, ["P"]) 
-         
-    def _getBaseballTeamStats(self, city, year, tableID, posToOmit=[]):
-        soup = self._getSoupTeamStats(city, year)
-        fullStatsTable = soup.find("table", id=tableID)
-        justPlayersStatsTable = fullStatsTable.find("tbody")
-        playersRows = justPlayersStatsTable.findAll("tr", class_=lambda x : x != "thead")
-        #print(playersRows)
-        if posToOmit: #if list is not empty
-            playersRowsPosOmitted = []
-            try:
-                for row in playersRows:
-                    pos = row.find("td", {'data-stat':'pos'})
-                    #print(pos.string)
-                    if(pos.string not in posToOmit):
-                        playersRowsPosOmitted.append(row) 
-                playersRows = playersRowsPosOmitted
-            except AttributeError:
-                pass
+        return self._getStatsFromTable(city, year, tableID, ["P"]) 
         
-        playersStats = []
-        for player in playersRows:
-            tempPlayer = ()
-            name = player.find("td",{'data-stat':'player'})
-            tempPlayer = (*tempPlayer, name.text)
-            #print(pitcherName.text) 
-            age = player.find("td",{'data-stat':'age'})
-            tempPlayer = (*tempPlayer, age.text)
-            games = player.find("td",{'data-stat':'G'})
-            tempPlayer = (*tempPlayer, games.text)
-            playersStats.append(tempPlayer)
- 
-        return playersStats
     
-    #def getPlayersRowsPosOmitted()
     
 
 class basketballStatsScraper(statsScraper):
     def __init__(self):
         urlStats = "https://www.basketball-reference.com"
-        teamAbreviations = dict(
+        teamAbreviations = dict([
             ("Boston", "BOS"),
             ("Philadelphia", "PHI")
-        )
+        ])
         urlExtension = ".html"
         super().__init__(urlStats, teamAbreviations, urlExtension)
 
+    def getTeamPerGameStats(self, city, year):
+        tableID = "per_game"
+        return self._getStatsFromTable(city, year, tableID)
         

@@ -42,14 +42,18 @@ teams = [
 
 with sqlite3.connect('baseballStats.db') as statsDb:
     thisBaseballStatsScraper = webScraper.baseballStatsScraper()
-    baltimoreOriolesBatterStats = thisBaseballStatsScraper.getBaseballTeamBatterStats("Baltimore", "2023")
-    texasRangersBatterStats = thisBaseballStatsScraper.getBaseballTeamBatterStats("Texas", "2023")
+    baltimoreOriolesBatterStats = thisBaseballStatsScraper.getTeamBatterStats("Baltimore", "2023")
+    texasRangersBatterStats = thisBaseballStatsScraper.getTeamBatterStats("Texas", "2023")
+    thisBasketballStatsScraper = webScraper.basketballStatsScraper()
+    philadelphia76ersStats = thisBasketballStatsScraper.getTeamPerGameStats("Philadelphia", "2023")
+
     
     #statsDb.execute(createPitcherTable)
     #statsDb.execute(createTeamsTable)
     statsDb.execute(deleteAllRecordsPitcherTable)
-    for (idx, pitcher) in enumerate(baltimoreOriolesBatterStats):
+    #for (idx, pitcher) in enumerate(baltimoreOriolesBatterStats):
     #for (idx, pitcher) in enumerate(texasRangersBatterStats):  
+    for (idx, pitcher) in enumerate(philadelphia76ersStats):  
         pitcherData = ((idx,) + pitcher)
         #print(pitcherData)
         statsDb.execute(addPitcher, pitcherData)
