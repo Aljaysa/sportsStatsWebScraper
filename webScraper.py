@@ -25,11 +25,24 @@ class statsScraper(ABC):
         #print(r)
         soup = BeautifulSoup(r.text, "html.parser")
         return soup
-        
-    def _getStatsFromTable(self, city, year, tableID, posToOmit=[]):
+    
+    def _getTable(self, city, year, tableID):
         soup = self._getSoupTeamStats(city, year)
-        fullStatsTable = soup.find("table", id=tableID)
-        justPlayersStatsTable = fullStatsTable.find("tbody")
+        table = soup.find("table", id=tableID)
+        return table
+        
+    def _getHeadersFromTable(self, city, year, tableID):  
+        headers = []  
+        fullTable = self._getTable(city, year, tableID)
+        headersRowWebData = fullTable.find("thead").find().find_all("th") # the extra .find() is to probe into the <tr> html element: <thead> <tr> {All the Header data is here} </tr> </thead> ... so we need to probe into the <tr> as well as the <thead> before we can get to the header data. Then, the .contents is to get all of the headers (<th> and <td> elements) in a list
+        #print(headersRowWebData)
+        for dataCellWebData in headersRowWebData:
+            headers.append(dataCellWebData.text)
+        return headers
+    
+    def _getStatsFromTable(self, city, year, tableID, posToOmit=[]):
+        fullTable = self._getTable(city, year, tableID)
+        justPlayersStatsTable = fullTable.find("tbody")
         playersRows = justPlayersStatsTable.findAll("tr", class_=lambda x : x != "thead")
         #print(playersRows)
         if posToOmit: #if list is not empty
@@ -44,19 +57,16 @@ class statsScraper(ABC):
             except AttributeError:
                 pass    
     
-        thisPlayerStats = []
+        playersStats = []
         for thisPlayer in playersRows:
-            
-            tempPlayer = ()
-            name = player.find("td",{'data-stat':'player'})
-            tempPlayer = (*tempPlayer, name.text)
-            #print(pitcherName.text)
-            age = player.find("td",{'data-stat':'age'})
-            tempPlayer = (*tempPlayer, age.text)
-            games = player.find("td",{'data-stat':'G'})
-            tempPlayer = (*tempPlayer, games.text)
-            playersStats.append(tempPlayer)
- 
+            thisPlayerStatsNum = []
+            thisPlayerStatsWebData = thisPlayer.contents # currently, "th" elements are also included so that the "rank" col in many baseball reference graphs are included for instance. This is because .contents gets all children of a given html element, regardless of what tag it has (<td>, <th>, etc.)
+            try: 
+                for dataCellWebData in thisPlayerStatsWebData:
+                    thisPlayerStatsNum.append(dataCellWebData.text)
+            except:
+                raise AttributeError("When scraping through a player's stats one col at a time, found that one of this player's stats does not have a text value")
+            playersStats.append(thisPlayerStatsNum)
         return playersStats    
     
     @classmethod
@@ -75,10 +85,17 @@ class baseballStatsScraper(statsScraper):
         urlExtension = ".shtml"
         super().__init__(urlStats, teamAbreviations, urlExtension)
 
+    def getTeamPitcherHeaders(self, city, year):
+        tableID = "team_pitching"
+        return self._getHeadersFromTable(city, year, tableID)
 
     def getTeamPitcherStats(self, city, year):
         tableID = "team_pitching"
         return self._getStatsFromTable(city, year, tableID)
+    
+    def getTeamBatterHeaders(self, city, year):
+        tableID = "team_batting"
+        return self._getHeadersFromTable(city, year, tableID)
         
     def getTeamBatterStats(self, city, year):
         tableID = "team_batting"

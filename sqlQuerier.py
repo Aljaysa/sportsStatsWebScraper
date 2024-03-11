@@ -19,7 +19,7 @@ createTeamsTable =  '''CREATE TABLE teams (
                         wins INTEGER
                     )'''
     
-addPitcher = '''INSERT INTO pitchers (pitcherId, name, age, games) VALUES (?, ?, ?, ?)'''
+addPitcher = '''INSERT INTO pitchers (name, age, games) VALUES (?, ?, ?)'''
 
 addTeam = '''INSERT INTO teams (city, teamName, wins) VALUES (?, ?, ?)'''
 
@@ -42,6 +42,7 @@ teams = [
 
 with sqlite3.connect('baseballStats.db') as statsDb:
     thisBaseballStatsScraper = webScraper.baseballStatsScraper()
+    baltimoreOriolesBatterHeaders = thisBaseballStatsScraper.getTeamBatterHeaders("Baltimore", "2023")
     baltimoreOriolesBatterStats = thisBaseballStatsScraper.getTeamBatterStats("Baltimore", "2023")
     texasRangersBatterStats = thisBaseballStatsScraper.getTeamBatterStats("Texas", "2023")
     thisBasketballStatsScraper = webScraper.basketballStatsScraper()
@@ -51,13 +52,19 @@ with sqlite3.connect('baseballStats.db') as statsDb:
     #statsDb.execute(createPitcherTable)
     #statsDb.execute(createTeamsTable)
     statsDb.execute(deleteAllRecordsPitcherTable)
-    #for (idx, pitcher) in enumerate(baltimoreOriolesBatterStats):
+    
+    print(baltimoreOriolesBatterHeaders)
+""" 
+    for pitcher in baltimoreOriolesBatterStats:
     #for (idx, pitcher) in enumerate(texasRangersBatterStats):  
-    for (idx, pitcher) in enumerate(philadelphia76ersStats):  
-        pitcherData = ((idx,) + pitcher)
-        #print(pitcherData)
-        statsDb.execute(addPitcher, pitcherData)
-""""    
+    #for (idx, pitcher) in enumerate(philadelphia76ersStats):
+        print(pitcher)
+        #statsDb.execute(addPitcher, pitcher)
+"""         
+    
+
+        
+""" 
     for team in teams:
         #print(team)
         statsDb.execute(addTeam, team)
