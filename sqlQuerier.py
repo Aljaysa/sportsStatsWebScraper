@@ -42,7 +42,7 @@ teams = [
 
 _VARCHAR_MAX_STR_LEN = 30
 _SPECIAL_CHARS = ("+", "-") #({'`','~','!','@','#','$','%','^','&','*','(',')','_','-','+','=','{','[','}','}','|','\',':',';','"',''','<',',','>','.','?','/'})
-_SPECIAL_CHAR_DATABASE_REPLACEMENTS = dict([
+_SPECIAL_CHAR_REPLACEMENT_STRS = dict([
     ("+", "PLUS"),
     ("-", "MINUS")
 ])
@@ -75,13 +75,20 @@ def addUnderscoreToStrFirstCharNum(str):
         
 #@staticmethod
 def getReplacedSpecialCharsStr(str):
-        try:
-            for specialChar in _SPECIAL_CHARS:
-                if(specialChar in str):
-                    return 
+        if(len(str) == 0):
             return str
-        except IndexError:
-            return str
+        else:
+            specialCharsReplacedStr = ""
+            for char in str:
+                if(char in _SPECIAL_CHARS):
+                    try:
+                        specialCharsReplacedStr = specialCharsReplacedStr + _SPECIAL_CHAR_REPLACEMENT_STRS[char]
+                    except KeyError:
+                        specialCharsReplacedStr = specialCharsReplacedStr + "_ERROR:SPECIAL_CHAR_IN_HEADER_NOT_SUPPORTED_"
+                else:
+                    specialCharsReplacedStr = specialCharsReplacedStr + char
+            return specialCharsReplacedStr
+        
    
 
 def getCreateTableHeaderDecl(headerName, headerType, isNotNullPrimaryKey=False):
@@ -102,6 +109,7 @@ def getCreateTableHeaderDecl(headerName, headerType, isNotNullPrimaryKey=False):
 
 def getCreateTableHeaderDecls(headerNames, headerTypes):
     for (headerName, headerType) in zip(headerNames, headerTypes):
+        headerName = getReplacedSpecialCharsStr(headerName)
         headerName = addUnderscoreToStrFirstCharNum(headerName)
         yield getCreateTableHeaderDecl(headerName, headerType)
 
