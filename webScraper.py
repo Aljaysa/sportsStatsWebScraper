@@ -3,6 +3,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import inspect
 from abc import ABC, abstractmethod 
+import ast, re
+from enum import Enum
 
 class statsScraper(ABC):
     _STR_BASEBALL = "Baseball"
@@ -69,10 +71,33 @@ class statsScraper(ABC):
             playersStats.append(thisPlayerStatsNum)
         return playersStats    
     
-    @classmethod
+    @staticmethod
+    def returnInferredType(toInfer):
+        if len(toInfer) == 0: return None
+        try:
+            #print(type(ast.literal_eval(toInfer)))
+            return type(ast.literal_eval(toInfer))
+        except ValueError:
+            return type(" ")
+        except SyntaxError:
+            return type(" ")
+    
+    @staticmethod
+    def getInferredTypesFromStrings(strList):
+        typeList = [] 
+        for str in strList:
+            typeList.append(statsScraper.returnInferredType(str))
+            #print(f"{str}: {statsScraper.returnInferredType(str)}")
+        #print(typeList)
+        return typeList
+
+    
+    @staticmethod
     def _raiseErrorInvalidArg(nameOfEnclosingFunc):
         raise ValueError(f"argument provided to function '{nameOfEnclosingFunc}'' invalid")
 
+
+ 
 class baseballStatsScraper(statsScraper):
     _POS_PLAYER_ABREV = ["C", "1B", "2B", "SS", "3B", "LF", "CF", "RF", "DH", "UT", "OF", "IF", "DH"]
     _PITCHER_ABREV = "P"
@@ -82,7 +107,7 @@ class baseballStatsScraper(statsScraper):
             ("Baltimore", "BAL"),
             ("Texas", "TEX")
         ])
-        urlExtension = ".shtml"
+        urlExtension = ".shtml" #.shtml
         super().__init__(urlStats, teamAbreviations, urlExtension)
 
     def getTeamPitcherHeaders(self, city, year):
@@ -94,7 +119,7 @@ class baseballStatsScraper(statsScraper):
         return self._getStatsFromTable(city, year, tableID)
     
     def getTeamBatterHeaders(self, city, year):
-        tableID = "team_batting"
+        tableID = "team_batting" #payroll
         return self._getHeadersFromTable(city, year, tableID)
         
     def getTeamBatterStats(self, city, year):

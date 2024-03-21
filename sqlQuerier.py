@@ -40,20 +40,102 @@ teams = [
 ('Toronto', 'Blue Jays', 3) 
 """
 
+_VARCHAR_MAX_STR_LEN = 30
+_SPECIAL_CHARS = ("+", "-") #({'`','~','!','@','#','$','%','^','&','*','(',')','_','-','+','=','{','[','}','}','|','\',':',';','"',''','<',',','>','.','?','/'})
+_SPECIAL_CHAR_DATABASE_REPLACEMENTS = dict([
+    ("+", "PLUS"),
+    ("-", "MINUS")
+])
+
+
+
+
+#@staticmethod
+def addUnderscoreToStrsFirstCharNum(strList):
+    newStrList = []
+    for str in strList:
+        try:
+            if(str[0].isdigit()):
+                newStrList.append("_" + str)
+            else:
+                newStrList.append(str)
+        except IndexError:
+            newStrList.append(str)
+    return newStrList
+
+#@staticmethod
+def addUnderscoreToStrFirstCharNum(str):
+        try:
+            if(str[0].isdigit()):
+                return ("_" + str)
+            else:
+                return str
+        except IndexError:
+            return str
+        
+#@staticmethod
+def getReplacedSpecialCharsStr(str):
+        try:
+            for specialChar in _SPECIAL_CHARS:
+                if(specialChar in str):
+                    return 
+            return str
+        except IndexError:
+            return str
+   
+
+def getCreateTableHeaderDecl(headerName, headerType, isNotNullPrimaryKey=False):
+    tableHeaderStr = ""
+    if headerType is bool:
+        tableHeaderStr = f'{headerName} BOOL'
+    elif headerType is int:
+        tableHeaderStr = f'{headerName} INT'
+    elif headerType is float:
+        tableHeaderStr = f'{headerName} FLOAT'
+    else:
+        tableHeaderStr = f'{headerName} VARCHAR({_VARCHAR_MAX_STR_LEN})' 
+    if(isNotNullPrimaryKey):
+        tableHeaderStr = tableHeaderStr + " NOT NULL PRIMARY KEY"
+    return tableHeaderStr
+
+
+
+def getCreateTableHeaderDecls(headerNames, headerTypes):
+    for (headerName, headerType) in zip(headerNames, headerTypes):
+        headerName = addUnderscoreToStrFirstCharNum(headerName)
+        yield getCreateTableHeaderDecl(headerName, headerType)
+
+
+def getCreateTableCmd(tableName, headerNames, headerTypes):
+    createTableHeaderDecls = getCreateTableHeaderDecls(headerNames, headerTypes)
+    createTableCmd = f"CREATE TABLE {tableName} ("
+    createTableCmd = createTableCmd + ",\n".join(createTableHeaderDecls)
+    createTableCmd = createTableCmd + ")"
+    return createTableCmd
+         
+
 with sqlite3.connect('baseballStats.db') as statsDb:
     thisBaseballStatsScraper = webScraper.baseballStatsScraper()
     baltimoreOriolesBatterHeaders = thisBaseballStatsScraper.getTeamBatterHeaders("Baltimore", "2023")
     baltimoreOriolesBatterStats = thisBaseballStatsScraper.getTeamBatterStats("Baltimore", "2023")
-    texasRangersBatterStats = thisBaseballStatsScraper.getTeamBatterStats("Texas", "2023")
-    thisBasketballStatsScraper = webScraper.basketballStatsScraper()
-    philadelphia76ersStats = thisBasketballStatsScraper.getTeamPerGameStats("Philadelphia", "2023")
+    baltimoreOriolesBatterHeaderTypes = thisBaseballStatsScraper.getInferredTypesFromStrings(baltimoreOriolesBatterStats[0])
+    #print(baltimoreOriolesBatterHeaderTypes)
+    createTableCmd = getCreateTableCmd("batters", baltimoreOriolesBatterHeaders, baltimoreOriolesBatterHeaderTypes)
+    #print(createTableCmd)
+    #texasRangersBatterStats = thisBaseballStatsScraper.getTeamBatterStats("Texas", "2023")
+    #thisBasketballStatsScraper = webScraper.basketballStatsScraper()
+    #philadelphia76ersStats = thisBasketballStatsScraper.getTeamPerGameStats("Philadelphia", "2023")
 
     
     #statsDb.execute(createPitcherTable)
     #statsDb.execute(createTeamsTable)
     statsDb.execute(deleteAllRecordsPitcherTable)
+    statsDb.execute(createTableCmd)
+
     
-    print(baltimoreOriolesBatterHeaders)
+    #for (statVal, type) in zip(baltimoreOriolesBatterStats[0], types):
+        #print(f"{statVal} : {type}")
+    #print(baltimoreOriolesBatterHeaders)
 """ 
     for pitcher in baltimoreOriolesBatterStats:
     #for (idx, pitcher) in enumerate(texasRangersBatterStats):  
