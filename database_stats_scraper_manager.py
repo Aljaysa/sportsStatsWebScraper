@@ -13,6 +13,7 @@ class DatabaseStatsScraperManager():
         tableName = f"{(self.baseballStatsScraper._teamCities[teamName]).capitalize()}BasicBatterStats"
         headers = StatsDatabaseUtility.formatTableHeaders(self.baseballStatsScraper.getTeamBatterHeaders(teamName, year))
         stats = self.baseballStatsScraper.getTeamBatterStats(teamName, year)
+        #stats removeAllBlankRows
         headerTypes = StatsDatabaseUtility.getInferredTypesFromStrings(stats[0])
         createTableCmd = StatsDatabaseUtility.getCreateTableCmd(tableName, headers, headerTypes)
         try:

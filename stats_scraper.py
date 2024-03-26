@@ -68,21 +68,47 @@ class StatsScraper(ABC):
                         playersRowsPosOmitted.append(row) 
                 playersRows = playersRowsPosOmitted
             except AttributeError:
-                pass    
-    
+                pass 
         playersStats = []
-        for thisPlayer in playersRows:
-            thisPlayerStatsNum = []
-            thisPlayerStatsWebData = thisPlayer.contents # currently, "th" elements are also included so that the "rank" col in many baseball reference graphs are included for instance. This is because .contents gets all children of a given html element, regardless of what tag it has (<td>, <th>, etc.)
-            try: 
-                for dataCellWebData in thisPlayerStatsWebData:
-                    thisPlayerStatsNum.append(dataCellWebData.text)
-            except:
-                raise AttributeError("When scraping through a player's stats one col at a time, found that one of this player's stats does not have a text value")
-            playersStats.append(thisPlayerStatsNum)
-        return playersStats    
-    
+        for thisPlayer in playersRows: 
+            thisPlayerStatsWebData = thisPlayer.contents # this gets mostly <td> elements. currently, "th" elements are also included so that the "rank" col in many baseball reference graphs are included for instance. This is because .contents gets all children of a given html element, regardless of what tag it has (<td>, <th>, etc.)
+            thisPlayerStatsNum = StatsScraper.getStatsInRow(thisPlayerStatsWebData)
+            if(len(thisPlayerStatsNum) != 0):
+                playersStats.append(thisPlayerStatsNum)
+        return playersStats      
 
+
+    @staticmethod
+    def getStatsInRow(thisPlayerStatsWebData):
+        thisPlayerStatsNum = []
+        try: 
+            for dataCellWebData in thisPlayerStatsWebData:
+                thisPlayerStatsNum.append(dataCellWebData.text)
+                #### The following try block is here so that summary type rows that have one value span multiple rows (see image): [] won't be added to the list of stats
+                try:
+                    intColSpan = int(dataCellWebData["colspan"])
+                    if(intColSpan > 1):
+                        return []
+                        #for _ in range(intColSpan - 1):
+                        #    thisPlayerStatsNum.append("")
+                except:
+                    pass
+                #### End of try block 
+        except:
+            raise AttributeError("When scraping through a player's stats one col at a time, found that one of this player's stats does not have a text value")
+        return thisPlayerStatsNum
+    
+    @staticmethod
+    def removeAllBlankRows(table):
+        tableBlankRowsRemoved = []
+        for row in table:
+            isRowBlank = True
+            for col in row:
+                if(col != ''):
+                    isRowBlank = False
+            if(not isRowBlank):
+                tableBlankRowsRemoved.append(row)
+        return tableBlankRowsRemoved
 
     
     @staticmethod
