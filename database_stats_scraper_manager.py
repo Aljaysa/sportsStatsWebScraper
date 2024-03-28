@@ -39,7 +39,7 @@ class DatabaseStatsScraperManager():
         database.execute(createTableCmd)
         insertIntoTableCmd = StatsDatabaseUtility.getInsertIntoCmd(tableName, headers)
         for statRow in stats:
-            print(statRow)
+            #print(statRow)
             database.execute(insertIntoTableCmd, statRow)
             
     def uploadAllTeamsBasicBatterStatsContracts(self, database, year):

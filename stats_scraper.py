@@ -15,7 +15,13 @@ class StatsScraper(ABC):
         self._urlExtension = urlExtension
         self._teamCities = teamCities
 
-    def _getUrlTeam(self, teamName):     
+    def _getUrlTeam(self, teamName): 
+        """Gets the Baseball Reference URL of a team's general stats page (this page is not specific to a certain season)
+        Args:
+            teamName (str): name of the sports team (ie. "Red Sox" for Boston)
+        Returns:
+            str: the Baseball Reference URL of a team's general stats page (this page is not specific to a certain season)
+        """            
         url = ""
         url = url + self._mainPageUrl
         url = url + "/teams"
@@ -23,6 +29,13 @@ class StatsScraper(ABC):
         return url
           
     def _getSoupTeamStats(self, teamName, year):
+        """Gets the BeautifulSoup object that contains the tree to be traversed of html web elements for a team's stats page
+        Args:
+            teamName (str): name of the sports team (ie. "Red Sox" for Boston)
+            year (str or int): year of the season to get the stats for
+        Returns:
+            BeautifulSoup: tree to be traversed of html web elements for a team's stats page
+        """        
         url = self._getUrlTeam(teamName)
         url = url + f"/{year}"
         url = url + self._urlExtension 
@@ -30,47 +43,70 @@ class StatsScraper(ABC):
 
     @staticmethod
     def _getSoup(url):
+        """Gets the BeautifulSoup object that contains the tree to be traversed of html web elements of any webpage
+        Args:
+            url (str): url of the webpage to get the html data from
+        Returns:
+            BeautifulSoup: tree to be traversed of html web elements
+        """        
         r = requests.get(url)
         #print(r)
         soup = BeautifulSoup(r.text, "html.parser")
         return soup
-
-    @abstractmethod
-    def _getSoupTeamContracts(self, teamName):
-        pass
-    
     
     def _getTable(self, soup, tableID):
+        """Gets the a desired table on a webpage
+        Args:
+            soup (BeautifulSoup): the parent html web element where we look into it's children and descendants (children of those children and so on) for the table
+            tableID (str): the value of the "id" attribute of the table html web element
+        Returns:
+            BeautifulSoup: the desired table that like it's parent, is also a tree of html elements/BeautifulSoup objects
+        """        
         table = soup.find("table", id=tableID)
         return table
         
     def _getHeadersFromTable(self, soup, tableID): 
+        """Gets a list of headers of a table on a webpage
+        Args:
+            soup (BeautifulSoup): the parent html web element where we look into it's children and descendants (children of those children and so on) for the table
+            tableID (str): the value of the "id" attribute of the table html web element
+        Returns:
+            list: a list of strings representing the header columns of the table
+        """ 
         headers = []
         fullTable = self._getTable(soup, tableID)
         #print(fullTable)
         headersRowWebData = fullTable.find("thead").find().find_all("th") # the extra .find() is to probe into the <tr> html element: <thead> <tr> {All the Header data is here} </tr> </thead> ... so we need to probe into the <tr> as well as the <thead> before we can get to the header data. Then, the .contents is to get all of the headers (<th> and <td> elements) in a list
         for dataCellWebData in headersRowWebData:
-            headers.append(dataCellWebData.text)
+            headers.append(dataCellWebData.text) #surround this in try block later because maybe element doesn't have .text attribute?
         return headers
     
     def _getStatsFromTable(self, soup, tableID, posToOmit=[]):
+        """Gets a list  of stats from a table from a webpage
+        Args:
+            soup (BeautifulSoup): the parent html web element where we look into it's children and descendants (children of those children and so on) for the table
+            tableID (_type_): _description_
+            posToOmit (list, optional): _description_. Defaults to [].
+        Returns:
+            list: a list (2D if there are multiple rows not including the header row) of stats (in string) from a table
+        """        
         fullTable = self._getTable(soup, tableID)
         justPlayersStatsTable = fullTable.find("tbody")
         playersRows = justPlayersStatsTable.findAll("tr", class_=lambda x : x != "thead")
         #print(playersRows)
         if posToOmit: #if list is not empty
             playersRowsPosOmitted = []
-            try:
+            try: #try block is to provide the same list of player rows as before but with all players with a given position removed
                 for row in playersRows:
                     pos = row.find("td", {'data-stat':'pos'})
                     #print(pos.string)
                     if(pos.string not in posToOmit):
                         playersRowsPosOmitted.append(row) 
                 playersRows = playersRowsPosOmitted
-            except AttributeError:
+            except AttributeError: #if row doesn't have a 'pos' attribute so can't even check its value to check position
                 pass 
         playersStats = []
-        for thisPlayer in playersRows: 
+        for thisPlayer in playersRows: #now that we have all player's BeautifulSoup objs in a list, extract the stats
             thisPlayerStatsWebData = thisPlayer.contents # this gets mostly <td> elements. currently, "th" elements are also included so that the "rank" col in many baseball reference graphs are included for instance. This is because .contents gets all children of a given html element, regardless of what tag it has (<td>, <th>, etc.)
             thisPlayerStatsNum = StatsScraper.getStatsInRow(thisPlayerStatsWebData)
             if(len(thisPlayerStatsNum) != 0):
@@ -80,26 +116,40 @@ class StatsScraper(ABC):
 
     @staticmethod
     def getStatsInRow(thisPlayerStatsWebData):
+        """Gets the stats of a given player/row of a table on a webpage
+        Args:
+            thisPlayerStatsWebData (BeautifulSoup): the html web element data for a given player/row of a table
+        Raises:
+            AttributeError: If when scraping through a player's stats one col at a time, it is found that one of this player's stats does not have a text value
+        Returns:
+            list: a list of strings representing the stats of a player/row of a table
+        """        
         thisPlayerStatsNum = []
         try: 
             for dataCellWebData in thisPlayerStatsWebData:
                 thisPlayerStatsNum.append(dataCellWebData.text)
                 #### The following try block is here so that summary type rows that have one value span multiple rows (see image): [] won't be added to the list of stats
-                try:
-                    intColSpan = int(dataCellWebData["colspan"])
+                try: # to get stats list to the correct len even though some values in the table span multiple columns
+                    intColSpan = int(dataCellWebData["colspan"]) 
                     if(intColSpan > 1):
                         return []
-                        #for _ in range(intColSpan - 1):
+                        #for _ in range(intColSpan - 1): # This option can be used instead of the line above if instead of not adding the row to the list of stats, you do want to add the row but you just want to add blank values ("") for all the cols that the value spans for (so that the num of cols in this row matches the num of cols in every other row)
                         #    thisPlayerStatsNum.append("")
                 except:
                     pass
                 #### End of try block 
         except:
-            raise AttributeError("When scraping through a player's stats one col at a time, found that one of this player's stats does not have a text value")
+            raise AttributeError("When scraping through a player's stats one col at a time, found that one of this player's stats does not have a text value") # toDo could turn this into logging so that dummy val of '' is inserted and no exception thrown but the issue is logged
         return thisPlayerStatsNum
     
     @staticmethod
     def removeAllBlankRows(table):
+        """Takes a table and returns the same table but with rows that only contain '' values removed
+        Args:
+            table (list): 2D list of strings that may or may not have blank rows
+        Returns:
+            list: 2D list of strings with rows that only contain '' values removed
+        """        
         tableBlankRowsRemoved = []
         for row in table:
             isRowBlank = True
