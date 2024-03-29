@@ -10,6 +10,13 @@ class StatsScraper(ABC):
     _STR_BASKETBALL = "Basketball"
     
     def __init__(self, mainPageUrl, teamAbreviations, urlExtension, teamCities) -> None:
+        """
+        Args:
+            mainPageUrl (str): base url of the main page of the sports stats website. All subpages' URLs add onto this URL ie: baseURL -> baseURL/moreURLWords/moreURLWords
+            teamAbreviations (dict): a dictionary of (str, str) (key, value) pairs where the key is the team's name (ie. "Red Sox" for Boston) and the value is the 3 letter abreviation that a given sports stats website uses to identify every team (ie. baseball-reference.com uses the 3 letters "BAL" to represent Baltimore Orioles)
+            urlExtension (str): the extension (ie. .html, .shtml, .com, etc.) that ends every URL of a any of the pages of a given sports stats website (ie. every URL on baseball-reference.com ends with .shtml)
+            teamCities (dict): a dictionary of (str, str) (key, value) pairs where the key is the team's name (ie. "Red Sox" for Boston) and the value is the city of that team (ie. "Toronto" for Blue Jays)
+        """        
         self._mainPageUrl = mainPageUrl
         self._teamAbreviations = teamAbreviations
         self._urlExtension = urlExtension
@@ -85,10 +92,10 @@ class StatsScraper(ABC):
         """Gets a list  of stats from a table from a webpage
         Args:
             soup (BeautifulSoup): the parent html web element where we look into it's children and descendants (children of those children and so on) for the table
-            tableID (_type_): _description_
-            posToOmit (list, optional): _description_. Defaults to [].
+            tableID (str): the value of the "id" attribute of the table html web element
+            posToOmit (list, optional): a list of the positions where all players with one of these positions will be ommitted from the returned list. Defaults to [].
         Returns:
-            list: a list (2D if there are multiple rows not including the header row) of stats (in string) from a table
+            list: a list (2D if there are multiple rows not including the header row) of stats (strings) from the table
         """        
         fullTable = self._getTable(soup, tableID)
         justPlayersStatsTable = fullTable.find("tbody")
@@ -159,10 +166,15 @@ class StatsScraper(ABC):
             if(not isRowBlank):
                 tableBlankRowsRemoved.append(row)
         return tableBlankRowsRemoved
-
     
     @staticmethod
     def _raiseErrorInvalidArg(nameOfEnclosingFunc):
+        """Raises an Exception with a message. Used for situations when an argument provided to a funciton is invalid (not one of the options supported)
+        Args:
+            nameOfEnclosingFunc (str): name of the function that the exception is thrown
+        Raises:
+            ValueError: exception object to be raised
+        """        
         raise ValueError(f"argument provided to function '{nameOfEnclosingFunc}'' invalid")
 
 
@@ -170,7 +182,7 @@ class StatsScraper(ABC):
 class BaseballStatsScraper(StatsScraper):
     _POS_PLAYER_ABREV = ["C", "1B", "2B", "SS", "3B", "LF", "CF", "RF", "DH", "UT", "OF", "IF", "DH"]
     _PITCHER_ABREV = "P"
-    def __init__(self):
+    def __init__(self):       
         urlStats = "https://www.baseball-reference.com"
         """
         teamCities = [
@@ -273,39 +285,83 @@ class BaseballStatsScraper(StatsScraper):
         ])
         super().__init__(urlStats, teamAbreviations, urlExtension, teamCities)
         
-    def _getSoupTeamContracts(self, teamName):
+    def _getSoupTeamContracts(self, teamName):    
+        """Gets the BeautifulSoup object that contains the tree to be traversed of html web elements for a team's contract stats page
+        Args:
+            teamName (str): name of the sports team (ie. "Red Sox" for Boston)
+        Returns:
+           BeautifulSoup: tree to be traversed of html web elements for a team's contract stats page
+        """        
         url = self._getUrlTeam(teamName)
         url = url + f"/{self._teamCities[teamName].lower()}-{teamName.lower()}-salaries-and-contracts{self._urlExtension}" 
         return self._getSoup(url)
-    
-    
 
     def getTeamPitcherHeaders(self, teamName: str, year: str) -> list[str]:
+        """Gets a list of headers of the pitcher basic stats table on a team's main stats page
+        Args:
+            teamName (str): name of the sports team (ie. "Red Sox" for Boston)
+            year (str or int): year of the season to get the stats for
+        Returns:
+            list: a list of strings representing the header columns of the table
+        """ 
         soup = self._getSoupTeamStats(teamName, year) 
         tableID = "team_pitching"
         return self._getHeadersFromTable(soup, tableID)
 
     def getTeamPitcherStats(self, teamName: str, year: str) -> list[str]:
+        """Gets a list of stats of the pitcher basic stats table on a team's main stats page
+        Args:
+            teamName (str): name of the sports team (ie. "Red Sox" for Boston)
+            year (str or int): year of the season to get the stats for
+        Returns:
+            list: a list (2D if there are multiple rows not including the header row) of stats (strings) from the table
+        """ 
         soup = self._getSoupTeamStats(teamName, year)
         tableID = "team_pitching"
         return self._getStatsFromTable(soup, tableID)
     
     def getTeamBatterHeaders(self, teamName: str, year: str) -> list[str]:
+        """Gets a list of headers of the batter basic stats table on a team's main stats page
+        Args:
+            teamName (str): name of the sports team (ie. "Red Sox" for Boston)
+            year (str or int): year of the season to get the stats for
+        Returns:
+            list: a list of strings representing the header columns of the table
+        """ 
         soup = self._getSoupTeamStats(teamName, year)
         tableID = "team_batting" #payroll
         return self._getHeadersFromTable(soup, tableID)
         
     def getTeamBatterStats(self, teamName: str, year: str) -> list[str]:
+        """Gets a list of stats of the batter basic stats table on a team's main stats page
+        Args:
+            teamName (str): name of the sports team (ie. "Red Sox" for Boston)
+            year (str or int): year of the season to get the stats for
+        Returns:
+            list: a list (2D if there are multiple rows not including the header row) of stats (strings) from the table
+        """ 
         soup = self._getSoupTeamStats(teamName, year)
         tableID = "team_batting"
         return self._getStatsFromTable(soup, tableID, ["P"]) 
     
     def getTeamContractHeaders(self, teamName: str) -> list[str]:
+        """Gets a list of headers of the contracts table on a team's contract stats page
+        Args:
+            teamName (str): name of the sports team (ie. "Red Sox" for Boston)
+        Returns:
+            list: a list of strings representing the header columns of the table
+        """
         soup = self._getSoupTeamContracts(teamName)
         tableID = "payroll"
         return self._getHeadersFromTable(soup, tableID)
     
     def getTeamContractStats(self, teamName: str) -> list[str]:
+        """Gets a list of stats of the contracts table on a team's contract stats page
+        Args:
+            teamName (str): name of the sports team (ie. "Red Sox" for Boston)
+        Returns:
+            list: a list (2D if there are multiple rows not including the header row) of stats (strings) from the table
+        """ 
         soup = self._getSoupTeamContracts(teamName)
         tableID = "payroll"
         return self._getStatsFromTable(soup, tableID)
@@ -325,6 +381,13 @@ class BasketballStatsScraper(StatsScraper):
         super().__init__(urlStats, teamAbreviations, urlExtension)
 
     def getTeamPerGameStats(self, teamName, year):
+        """Gets a list of stats of the "per game" table on a team's main stats page
+        Args:
+            teamName (str): name of the sports team (ie. "Red Sox" for Boston)
+            year (str or int): year of the season to get the stats for
+        Returns:
+            list: a list (2D if there are multiple rows not including the header row) of stats (strings) from the table
+        """ 
         tableID = "per_game"
         return self._getStatsFromTable(teamName, year, tableID)
         
