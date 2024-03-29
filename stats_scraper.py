@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 
 class StatsScraper(ABC):
+    
     _STR_BASEBALL = "Baseball"
     _STR_BASKETBALL = "Basketball"
     

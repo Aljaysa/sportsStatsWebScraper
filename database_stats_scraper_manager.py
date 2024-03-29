@@ -9,7 +9,13 @@ class DatabaseStatsScraperManager():
     def __init__(self):
         self.baseballStatsScraper = BaseballStatsScraper()
 
-    def uploadTeamBasicBatterStats(self, database, year, teamName):   
+    def uploadTeamBasicBatterStats(self, database, teamName, year):   
+        """Adds every player from a baseball team's basic batter stats on its team's main page to a database
+        Args:
+            database (sqlite3.Connection): database to upload to
+            teamName (str): name of the sports team (ie. "Red Sox" for Boston)
+            year (str or int): year of the season to get the stats for
+        """        
         tableName = f"{(self.baseballStatsScraper._teamCities[teamName]).capitalize()}BasicBatterStats"
         headers = StatsDatabaseUtility.formatTableHeaders(self.baseballStatsScraper.getTeamBatterHeaders(teamName, year))
         stats = self.baseballStatsScraper.getTeamBatterStats(teamName, year)
@@ -49,7 +55,8 @@ class DatabaseStatsScraperManager():
 
 with sqlite3.connect('baseballStats.db') as statsDb:
     thisDatabaseStatsScraperManager = DatabaseStatsScraperManager()
-    thisDatabaseStatsScraperManager.uploadTeamBasicBatterStats(statsDb, "2023", "Orioles")
+    thisDatabaseStatsScraperManager.uploadTeamBasicBatterStats(statsDb, "Orioles", "2023")
     thisDatabaseStatsScraperManager.uploadTeamBatterContracts(statsDb, "Orioles")
     #thisDatabaseStatsScraperManager.uploadAllTeamsBatterStatsContracts(statsDb, "2023")
     statsDb.commit()
+    print(type(statsDb))
