@@ -6,7 +6,12 @@ from abc import ABC, abstractmethod
 from enum import Enum
 
 class StatsScraper(ABC):
-    
+    """A class to gets the stats and data of a sports stat website into data types like lists
+    _STR_BASEBALL (str): the word Baseball in string format
+    _STR_BASKETBALL (str): the word Basketball in string format
+    Methods:
+    removeAllBlankRows(table): Takes a table and returns the same table but with rows that only contain '' values removed
+    """         
     _STR_BASEBALL = "Baseball"
     _STR_BASKETBALL = "Basketball"
     
@@ -116,14 +121,24 @@ class StatsScraper(ABC):
         playersStats = []
         for thisPlayer in playersRows: #now that we have all player's BeautifulSoup objs in a list, extract the stats
             thisPlayerStatsWebData = thisPlayer.contents # this gets mostly <td> elements. currently, "th" elements are also included so that the "rank" col in many baseball reference graphs are included for instance. This is because .contents gets all children of a given html element, regardless of what tag it has (<td>, <th>, etc.)
-            thisPlayerStatsNum = StatsScraper.getStatsInRow(thisPlayerStatsWebData)
+            thisPlayerStatsNum = StatsScraper._getStatsInRow(thisPlayerStatsWebData)
             if(len(thisPlayerStatsNum) != 0):
                 playersStats.append(thisPlayerStatsNum)
         return playersStats      
 
+    
+    @staticmethod
+    def _raiseErrorInvalidArg(nameOfEnclosingFunc):
+        """Raises an Exception with a message. Used for situations when an argument provided to a funciton is invalid (not one of the options supported)
+        Args:
+            nameOfEnclosingFunc (str): name of the function that the exception is thrown
+        Raises:
+            ValueError: exception object to be raised
+        """        
+        raise ValueError(f"argument provided to function '{nameOfEnclosingFunc}'' invalid")
 
     @staticmethod
-    def getStatsInRow(thisPlayerStatsWebData):
+    def _getStatsInRow(thisPlayerStatsWebData):
         """Gets the stats of a given player/row of a table on a webpage
         Args:
             thisPlayerStatsWebData (BeautifulSoup): the html web element data for a given player/row of a table
@@ -167,20 +182,22 @@ class StatsScraper(ABC):
             if(not isRowBlank):
                 tableBlankRowsRemoved.append(row)
         return tableBlankRowsRemoved
-    
-    @staticmethod
-    def _raiseErrorInvalidArg(nameOfEnclosingFunc):
-        """Raises an Exception with a message. Used for situations when an argument provided to a funciton is invalid (not one of the options supported)
-        Args:
-            nameOfEnclosingFunc (str): name of the function that the exception is thrown
-        Raises:
-            ValueError: exception object to be raised
-        """        
-        raise ValueError(f"argument provided to function '{nameOfEnclosingFunc}'' invalid")
+
 
 
  
 class BaseballStatsScraper(StatsScraper):
+    """A class to gets the stats and data of a baseball stat website into data types like lists
+    _POS_PLAYER_ABREV:  One letter abbriviation representing all other positions than pitcher 
+    _PITCHER_ABREV: One letter abbriviation representing pitcher position
+        Methods:
+        getTeamPitcherHeaders: Gets a list of headers of the pitcher basic stats table on a team's main stats page
+        getTeamPitcherStats: Gets a list of stats of the pitcher basic stats table on a team's main stats page
+        getTeamBatterHeaders: Gets a list of headers of the batter basic stats table on a team's main stats page
+        getTeamBatterStats: Gets a list of stats of the batter basic stats table on a team's main stats page
+        getTeamContractHeaders: Gets a list of headers of the contracts table on a team's contract stats page
+        getTeamContractStats: Gets a list of stats of the contracts table on a team's contract stats page
+    """
     _POS_PLAYER_ABREV = ["C", "1B", "2B", "SS", "3B", "LF", "CF", "RF", "DH", "UT", "OF", "IF", "DH"]
     _PITCHER_ABREV = "P"
     def __init__(self):       

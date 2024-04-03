@@ -41,6 +41,8 @@ teams = [
 
 @final
 class StatsDatabaseUtility:
+    """A class to manage data (insert, delete, etc) in an SQL database
+    """
     _VARCHAR_MAX_STR_LEN = 30
     #_SPECIAL_CHARS = ("+", "-") #({'`','~','!','@','#','$','%','^','&','*','(',')','_','-','+','=','{','[','}','}','|','\',':',';','"',''','<',',','>','.','?','/'})
     _SPECIAL_CHAR_REPLACEMENT_STRS = dict([

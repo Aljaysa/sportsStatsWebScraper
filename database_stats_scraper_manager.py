@@ -6,6 +6,8 @@ from stats_scraper import BaseballStatsScraper as BaseballStatsScraper
 from stats_scraper import BasketballStatsScraper as BasketballStatsScraper
 
 class DatabaseStatsScraperManager():
+    """A class to coordinate the scraping of data from sports stats websites and the uploading and management of those stats in an SQL database
+    """
     def __init__(self):
         self.baseballStatsScraper = BaseballStatsScraper()
 
