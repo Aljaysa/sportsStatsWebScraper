@@ -277,7 +277,7 @@ class BaseballStatsScraper(StatsScraper):
             ("Cubs", "Chicago"),
             ("White Sox", "Chicago"),
             ("Reds", "Cincinnati"),
-            ("Guardians", "CLE"),
+            ("Guardians", "Cleveland"),
             ("Rockies", "Colorado"),
             ("Tigers", "Detroit"),
             ("Marlins", "Florida"),

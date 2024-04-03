@@ -33,7 +33,7 @@ class DatabaseStatsScraperManager():
         for statRow in stats:
             database.execute(insertIntoTableCmd, statRow)
             
-    def uploadTeamBatterContracts(self, database, teamName):   
+    def uploadTeamContracts(self, database, teamName):   
         tableName = f"{(self.baseballStatsScraper._teamCities[teamName]).capitalize()}Contracts"
         headers = StatsDatabaseUtility.formatTableHeaders(self.baseballStatsScraper.getTeamContractHeaders(teamName))
         #print(headers)
@@ -50,15 +50,18 @@ class DatabaseStatsScraperManager():
             #print(statRow)
             database.execute(insertIntoTableCmd, statRow)
             
-    def uploadAllTeamsBasicBatterStatsContracts(self, database, year):
+    def uploadAllTeamsContracts(self, database):
         for teamName in self.baseballStatsScraper._teamCities:
-            self.uploadTeamBatterStatsContracts(database, year, teamName)
+            try:
+                self.uploadTeamContracts(database, teamName)
+            except Exception as e:
+                print(f"{teamName}: {e}")
 
 
 with sqlite3.connect('baseballStats.db') as statsDb:
     thisDatabaseStatsScraperManager = DatabaseStatsScraperManager()
-    thisDatabaseStatsScraperManager.uploadTeamBasicBatterStats(statsDb, "Orioles", "2023")
-    thisDatabaseStatsScraperManager.uploadTeamBatterContracts(statsDb, "Orioles")
-    #thisDatabaseStatsScraperManager.uploadAllTeamsBatterStatsContracts(statsDb, "2023")
+    #thisDatabaseStatsScraperManager.uploadTeamBasicBatterStats(statsDb, "Orioles", "2023")
+    #thisDatabaseStatsScraperManager.uploadTeamContracts(statsDb, "Orioles")
+    thisDatabaseStatsScraperManager.uploadAllTeamsContracts(statsDb)
+    #thisDatabaseStatsScraperManager.uploadAllTeamsBatterStats(statsDb, "2023")
     statsDb.commit()
-    print(type(statsDb))
