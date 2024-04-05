@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import inspect
 from abc import ABC, abstractmethod 
 from enum import Enum
+import sys
 
 class StatsScraper(ABC):
     """A class to gets the stats and data of a sports stat website into data types like lists
@@ -75,7 +76,13 @@ class StatsScraper(ABC):
         Returns:
             BeautifulSoup: the desired table that like it's parent, is also a tree of html elements/BeautifulSoup objects
         """        
+        #table = soup.find("body").find("div", id="wrap").find("div", id="content")#.find("div", id="all_team_batting").find("div", id="table_container is_setup").find("table", id="team_batting")
         table = soup.find("table", id=tableID)
+        if(table is None):
+            blockedBySiteMsg = soup.find("body").find("div", id="wrap").find("div", id="content")
+            #print(blockedBySiteMsg)
+            raise BlockedBySiteException(blockedBySiteMsg)
+        #print(table)
         return table
         
     def _getHeadersFromTable(self, soup, tableID): 
@@ -87,9 +94,13 @@ class StatsScraper(ABC):
             list: a list of strings representing the header columns of the table
         """ 
         headers = []
+        #with open("output.txt", "a") as f:
+        #    f.write(soup)
+        #out=sys.stdout
+        #out.write(soup.prettify())
         fullTable = self._getTable(soup, tableID)
         #print(fullTable)
-        headersRowWebData = fullTable.find("thead").find().find_all("th") # the extra .find() is to probe into the <tr> html element: <thead> <tr> {All the Header data is here} </tr> </thead> ... so we need to probe into the <tr> as well as the <thead> before we can get to the header data. Then, the .contents is to get all of the headers (<th> and <td> elements) in a list
+        headersRowWebData = fullTable.find("head").find().find_all("th") # the extra .find() is to probe into the <tr> html element: <thead> <tr> {All the Header data is here} </tr> </thead> ... so we need to probe into the <tr> as well as the <thead> before we can get to the header data. Then, the .contents is to get all of the headers (<th> and <td> elements) in a list
         for dataCellWebData in headersRowWebData:
             headers.append(dataCellWebData.text) #surround this in try block later because maybe element doesn't have .text attribute?
         return headers
@@ -302,7 +313,7 @@ class BaseballStatsScraper(StatsScraper):
             ("Nationals", "Washington")
         ])
         super().__init__(urlStats, teamAbreviations, urlExtension, teamCities)
-        
+ 
     def _getSoupTeamContracts(self, teamName):    
         """Gets the BeautifulSoup object that contains the tree to be traversed of html web elements for a team's contract stats page
         Args:
@@ -310,9 +321,11 @@ class BaseballStatsScraper(StatsScraper):
         Returns:
            BeautifulSoup: tree to be traversed of html web elements for a team's contract stats page
         """        
+        
         url = self._getUrlTeam(teamName)
-        url = url + f"/{self._teamCities[teamName].lower()}-{teamName.lower()}-salaries-and-contracts{self._urlExtension}" 
-        return self._getSoup(url)
+        url = url + f"/{(self._teamCities[teamName].replace(' ', '-')).lower()}-{(teamName.replace(' ', '-')).lower()}-salaries-and-contracts{self._urlExtension}" 
+        soup = self._getSoup(url)
+        return soup
 
     def getTeamPitcherHeaders(self, teamName: str, year: str) -> list[str]:
         """Gets a list of headers of the pitcher basic stats table on a team's main stats page
@@ -409,3 +422,9 @@ class BasketballStatsScraper(StatsScraper):
         tableID = "per_game"
         return self._getStatsFromTable(teamName, year, tableID)
         
+class BlockedBySiteException(Exception):
+    def __init__(self, message, errors=None):            
+        # Call the base class constructor with the parameters it needs
+        super().__init__(message)
+        # Now for your custom code...
+        self.errors = errors

@@ -34,9 +34,8 @@ class DatabaseStatsScraperManager():
             database.execute(insertIntoTableCmd, statRow)
             
     def uploadTeamContracts(self, database, teamName):   
-        tableName = f"{(self.baseballStatsScraper._teamCities[teamName]).capitalize()}Contracts"
+        tableName = f"{teamName.capitalize()}Contracts"
         headers = StatsDatabaseUtility.formatTableHeaders(self.baseballStatsScraper.getTeamContractHeaders(teamName))
-        #print(headers)
         stats = self.baseballStatsScraper.getTeamContractStats(teamName)
         headerTypes = StatsDatabaseUtility.getInferredTypesFromStrings(stats[0])
         createTableCmd = StatsDatabaseUtility.getCreateTableCmd(tableName, headers, headerTypes)
@@ -56,12 +55,18 @@ class DatabaseStatsScraperManager():
                 self.uploadTeamContracts(database, teamName)
             except Exception as e:
                 print(f"{teamName}: {e}")
-
-
+                
+    def uploadAllTeamsBasicBatterStats(self, database, year):
+        for teamName in self.baseballStatsScraper._teamCities:
+            try:
+                self.uploadTeamBasicBatterStats(database, teamName, year)
+            except Exception as e:
+                print(f"{teamName}: {e}")
+    
 with sqlite3.connect('baseballStats.db') as statsDb:
     thisDatabaseStatsScraperManager = DatabaseStatsScraperManager()
-    #thisDatabaseStatsScraperManager.uploadTeamBasicBatterStats(statsDb, "Orioles", "2023")
-    #thisDatabaseStatsScraperManager.uploadTeamContracts(statsDb, "Orioles")
-    thisDatabaseStatsScraperManager.uploadAllTeamsContracts(statsDb)
-    #thisDatabaseStatsScraperManager.uploadAllTeamsBatterStats(statsDb, "2023")
+    thisDatabaseStatsScraperManager.uploadTeamBasicBatterStats(statsDb, "Orioles", "2023")
+    #thisDatabaseStatsScraperManager.uploadTeamContracts(statsDb, "Red Sox")
+    #thisDatabaseStatsScraperManager.uploadAllTeamsContracts(statsDb)
+    #thisDatabaseStatsScraperManager.uploadAllTeamsBasicBatterStats(statsDb, "2023")
     statsDb.commit()
