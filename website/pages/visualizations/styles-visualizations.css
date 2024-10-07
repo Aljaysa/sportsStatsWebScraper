@@ -1,0 +1,157 @@
+*,
+*::before,
+*::after {
+    box-sizing: content-box;
+}
+
+/* Remove default margin */
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+:root {
+    --sidebar-width: 250px;
+ }
+
+@property --menu-bar-height {
+    syntax: "<dimension>"; /*| <percentage> | <number>";*/
+    inherits: false;
+    initial-value: 130px;
+}
+
+.main {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    grid-template-rows: min-content 1fr;
+}
+
+
+.sidebar {
+    position: fixed;
+    grid-row: 2/2;
+    grid-column: 1/1;
+    background-color: lightgrey;
+    /*width: 310px;*/
+    /*width: 310px;*/
+    width: var(--sidebar-width);
+    height: 1000px;
+    margin-top: 44px;
+}
+
+.main-portion-page {
+    margin-top: 44px;
+    grid-row: 2/2;
+    grid-column: 2/2;
+    height: 1000px;
+    padding: 20px;
+}
+
+.subtopnav * {
+    display: inline-block;
+}
+
+
+
+.dropdown {
+    position: relative;
+}
+
+
+.subtopnav-dropdown-items 
+{
+    position: absolute;
+    display: none;
+    border-style:solid;
+
+}
+
+.subtopnav, .subtopnav-dropdown-items   {
+    background-color: #585c73;
+}
+
+
+.dropdown:hover > .subtopnav-dropdown-items, .dropdown:active > .subtopnav-dropdown-items {
+    display: block
+}
+
+.subtopnav {
+    grid-row: 1/1;
+    position: fixed;
+    z-index: 2;
+    width: 100%;
+
+
+    /*
+    padding: 0;
+    letter-spacing: 0.5px;
+    font-family: 'Source Sans Pro Topnav', sans-serif;
+    font-size: 0;
+    top: 56px;
+    z-index: 2;
+    
+    white-space: nowrap;
+    overflow: auto;
+    scrollbar-width: none;
+    */
+}
+
+
+.subtopnav 
+a:link, .subtopnav a:visited {
+    color: #d4d4d4;
+}
+
+.subtopnav 
+a:hover{
+    color: #ffffff;
+}
+
+.subtopnav 
+a:active {
+    color: rgb(55, 0, 49);
+}
+
+.subtopnav 
+a {
+    text-decoration: none;
+}
+
+.subtopnav .subtopnav-item, .subtopnav .subtopnav-dropdown-item {
+    border: 1px;
+    border-style: solid;
+    border-color: rgb(0, 0, 0);
+    width: auto;
+    padding: 8px 12px 8px 12px;
+    font-family:'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', 'sans-serif';
+    font-size: 20px;
+    /*
+    text-decoration: none;
+    line-height: 1.5;*/
+}
+/*
+.sidebar {
+    position: fixed;
+    display: block;
+    background-color: lightgrey;
+    z-index: 1;
+    height: 100%;
+    width: 300px;
+    
+}
+    */
+
+
+
+
+
+
+

@@ -41,7 +41,7 @@ teams = [
 
 @final
 class StatsDatabaseUtility:
-    """A class to manage data (insert, delete, etc) in an SQL database
+    """A class to manage data (insert, delete, select, etc) in an SQL database
     """
     _VARCHAR_MAX_STR_LEN = 30
     #_SPECIAL_CHARS = ("+", "-") #({'`','~','!','@','#','$','%','^','&','*','(',')','_','-','+','=','{','[','}','}','|','\',':',';','"',''','<',',','>','.','?','/'})
@@ -238,6 +238,24 @@ class StatsDatabaseUtility:
             #print(f"{str}: {StatsScraper._returnInferredType(str)}")
         #print(typeList)
         return typeList
+    
+    @staticmethod
+    def getSelectCmd(tableName, headerNames):
+        """Gets the string of code of a SQL SELECT statement for a given set of headers
+        Args:
+            tableName (str): name of the SQL table
+            headerNames (list): a list of strings corresponding to the header names of the SQL table (in order)
+        Returns:
+            str: the SQL SELECT statement for a given set of headers
+        """        
+        cmd = "SELECT "
+        cmd = cmd + ", ".join(headerNames)
+        cmd = cmd + " FROM "
+        cmd = cmd + tableName
+        return cmd  
+    
+    
+    
 
 
 

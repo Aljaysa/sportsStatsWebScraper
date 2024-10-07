@@ -99,8 +99,8 @@ class StatsScraper(ABC):
         #out=sys.stdout
         #out.write(soup.prettify())
         fullTable = self._getTable(soup, tableID)
-        #print(fullTable)
-        headersRowWebData = fullTable.find("head").find().find_all("th") # the extra .find() is to probe into the <tr> html element: <thead> <tr> {All the Header data is here} </tr> </thead> ... so we need to probe into the <tr> as well as the <thead> before we can get to the header data. Then, the .contents is to get all of the headers (<th> and <td> elements) in a list
+        #print(fullTable) #uncomment this line to see the html for the table
+        headersRowWebData = fullTable.find("thead").find().find_all("th") # the extra .find() is to probe into the <tr> html element: <thead> <tr> {All the Header data is here} </tr> </thead> ... so we need to probe into the <tr> as well as the <thead> before we can get to the header data. Then, the .contents is to get all of the headers (<th> and <td> elements) in a list
         for dataCellWebData in headersRowWebData:
             headers.append(dataCellWebData.text) #surround this in try block later because maybe element doesn't have .text attribute?
         return headers

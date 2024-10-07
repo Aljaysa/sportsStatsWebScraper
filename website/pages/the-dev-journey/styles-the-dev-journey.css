@@ -1,0 +1,172 @@
+
+*,
+*::before,
+*::after {
+    box-sizing: content-box;
+}
+
+/* Remove default margin */
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+:root {
+   --middle-shade-tidbit-tile: rgb(164, 164, 164);
+   --middle-shade-tidbit-tile: rgb(164, 164, 164);
+   --tidbit-icon-left-margin: 0.5rem;
+   --tidbit-icon-width: 2rem;
+}
+
+.tidbit-tiles {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.tidbit-tiles > :nth-child(1) {
+    background-color: darkorchid;
+    height: 300px;
+    grid-column-start: 1;
+    grid-column-end: 4;
+}
+
+.tidbit-tiles > :nth-child(2) {
+    background-color: lightgoldenrodyellow;
+    grid-column: 1/2;
+    grid-row: 2/4;
+}
+
+.tidbit-tiles > :nth-child(3) {
+    background-color: rgb(63, 63, 63);
+    grid-column: 3/4;
+    grid-row: 2/6;
+}
+
+.tidbit-tiles > :nth-child(4) {
+    background-color: rgb(233, 247, 255);
+    grid-column: 1/3;
+    grid-row: 5/6;
+}
+
+
+
+
+
+
+/* img {
+    overflow-clip-margin: content-box;
+    overflow: clip;
+    
+} */
+
+
+/* .tidbit-tile {
+    display: flex;
+} */
+
+/* 
+@property --tidbit-icon-left-margin {
+    syntax: "<dimension>";
+    inherits: false;
+    initial-value: 0.5rem;
+}
+
+@property --tidbit-icon-width {
+    syntax: "<dimension>";
+    inherits: false;
+    initial-value: 2rem;
+} */
+
+.tidbit-header {
+    display: grid;
+    grid-template-columns: calc(var(--tidbit-icon-left-margin) + var(--tidbit-icon-width) + 0.5rem) 1fr;
+    margin-top: 5px;
+    /* gap: 3px; */
+}
+
+.tidbit-header > *{
+    /* border-style: solid; */
+}
+
+.tidbit-header img {
+    width: var(--tidbit-icon-width); 
+    height: auto;
+    margin-top: 1rem;
+    margin-left: var(--tidbit-icon-left-margin);
+}
+
+.tidbit-header :last-child {
+
+}
+
+.tidbit-header-text {
+    display: flex;
+    flex-direction: column;
+    height: max-content;
+}
+
+.tidbit-header-text > * {
+    /* border-style: solid; */
+}
+
+.tidbit-header-text > .title {
+    flex: 1 0 content;
+}
+
+.tidbit-header-text > .subtitle {
+    flex: 40 0 content; 
+}
+
+
+.tidbit-tile .subtitle {
+    display: flex;
+    flex-wrap: wrap;
+    /* justify-content: space-between; */
+    /* align-items: start; */
+    align-content: start
+}
+
+.tidbit-tile .subtitle > * {
+    flex-basis: content;
+    flex: 1 1 content;
+    /* border-style: solid; */
+}
+
+.tidbit-tile .subtitle > :nth-child(1) {
+    flex: 2 1 content;
+}
+
+
+
+.tidbit-tile .subtitle,
+.tidbit-tile p:last-of-type
+{
+    color: var(--middle-shade-tidbit-tile)
+}
+
+.tidbit-tile.dark-background .title,
+.tidbit-tile.dark-background > p:first-of-type {
+    color: whitesmoke;
+}
+
+.tidbit-tile.light-background .title,
+.tidbit-tile.light-background > p:first-of-type {
+    color: darkslategrey;
+} 
+
+.tidbit-tile p {
+    margin-left: 10px;
+} 
+
+
+
+
+
