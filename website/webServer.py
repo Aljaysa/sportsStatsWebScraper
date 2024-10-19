@@ -15,7 +15,7 @@ def theeDevJourney():
     return render_template("the-dev-journey/the-dev-journey.html")
 
 
-@app.route('/visualizations', methods=['GET', 'POST'])
+@app.route('/hello', methods=['GET', 'POST'])
 def visualizationsMethods():
     # POST request
     if request.method == 'POST':
