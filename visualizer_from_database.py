@@ -22,7 +22,7 @@ class GraphInfo:
 
 
 
-_STATS_VIS_SAVE_PATH = 'website\static\embeddedHTML\statsGraphs\\' 
+_STATS_VIS_SAVE_PATH = 'static\embeddedHTML\statsGraphs\\' 
 
 
 def convertStringsToFloats(strList):
@@ -36,10 +36,10 @@ def convertStringsToFloats(strList):
         
 # def makeGraphHTMLFileName(self, )
     
-def makeGraphHTML(databaseManager: DatabaseManager, graphInfo: GraphInfo):
-    yData = databaseManager.selectBasicBatterStats(statsDb, graphInfo.teamName, graphInfo.year, [graphInfo.yHeaderName])
-    xData = databaseManager.selectBasicBatterStats(statsDb, graphInfo.teamName, graphInfo.year, [graphInfo.xHeaderName])
-    names = databaseManager.selectBasicBatterStats(statsDb, graphInfo.teamName, graphInfo.year, ["Name"])
+def generateGraphHTML(databaseManager: DatabaseManager, graphInfo: GraphInfo):
+    yData = databaseManager.selectBasicBatterStats(graphInfo.teamName, graphInfo.year, [graphInfo.yHeaderName])
+    xData = databaseManager.selectBasicBatterStats(graphInfo.teamName, graphInfo.year, [graphInfo.xHeaderName])
+    names = databaseManager.selectBasicBatterStats(graphInfo.teamName, graphInfo.year, ["Name"])
     teamNameWithoutSpaces = graphInfo.teamName.replace(" ", "")
     htmlFileName = f"{_STATS_VIS_SAVE_PATH}{teamNameWithoutSpaces}{graphInfo.year}{graphInfo.xHeaderName}Vs{graphInfo.yHeaderName}.html"
     graphTitle = f"{graphInfo.teamName} Batters {graphInfo.year} {graphInfo.xHeaderName} vs {graphInfo.yHeaderName}"
@@ -53,15 +53,10 @@ def makeGraphHTML(databaseManager: DatabaseManager, graphInfo: GraphInfo):
     with open(htmlFileName, mode="w") as file:
         args = ScatterplotInfo(convertStringsToFloats(xData), convertStringsToFloats(yData), graphInfo.xHeaderName, graphInfo.yHeaderName, graphTitle, names)
         file.write(stats_visualizer.makeScatterplotHTML(args))
+              
           
           
-          
-          
-            
-with sqlite3.connect('baseballStats.db') as statsDb:
-    thisDatabaseManager = DatabaseManager()
-
-    # xHeaderName = "Age"
-    # yHeaderName = "OPSPLUS"
-    # scatterplotArgs = GraphInfo("White Sox", "2023", xHeaderName, yHeaderName, GraphType.SCATTERPLOT) 
-    # thisDatabaseManager.makeGraphHTML(scatterplotArgs)
+def generateGraphHTMLUsingDatabase(databaseFileName, graphInfo: GraphInfo):      
+    thisDatabaseManager = DatabaseManager(databaseFileName)
+    generateGraphHTML(thisDatabaseManager, graphInfo)
+    

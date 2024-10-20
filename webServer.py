@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, render_template
-from visualizer_from_database import VisualizerFromDatabase
+import visualizer_from_database
+from visualizer_from_database import GraphInfo, GraphType
 
 app = Flask(__name__)
 
@@ -21,10 +22,11 @@ def getVisualizationsGraph():
     if request.method == 'GET':
         try:
             message = {'greeting':request.full_path.split("?", 1)[1]}
-            
-            return jsonify(message)  # serialize and use JSON headers
-        except:
-            return "/visualizations/graph GET request does not contain arguments as expected"
+            scatterplotArgs = GraphInfo("White Sox", "2023", "Age", "OPSPLUS", GraphType.SCATTERPLOT) 
+            visualizer_from_database.generateGraphHTMLUsingDatabase("baseballStats.db", scatterplotArgs)
+            return message
+        except Exception as e:
+            return e
         
     
 if __name__ == "__main__":

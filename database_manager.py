@@ -12,8 +12,9 @@ class DatabaseManager:
     """
      
     
-    def __init__(self):
+    def __init__(self, databaseFileName):
         self.baseballStatsScraper = BaseballStatsScraper()
+        self.databaseFileName = databaseFileName
 
     def getTableNameBasicBatterStats(self, teamName, year):
         teamNameWithoutSpaces = teamName.replace(" ", "")
@@ -41,6 +42,7 @@ class DatabaseManager:
         insertIntoTableCmd = stats_database_utility.getInsertIntoCmd(tableName, headers)
         for statRow in stats:
             database.execute(insertIntoTableCmd, statRow)
+        database.commit()
             
     def uploadTeamContracts(self, database, teamName):   
         tableName = f"{teamName.capitalize()}Contracts"
@@ -57,6 +59,7 @@ class DatabaseManager:
         for statRow in stats:
             #print(statRow)
             database.execute(insertIntoTableCmd, statRow)
+        database.commit()
             
     def uploadAllTeamsContracts(self, database):
         for teamName in self.baseballStatsScraper._teamCities:
@@ -75,30 +78,26 @@ class DatabaseManager:
     def selectAllBasicBatterStats(self, database, teamName, year):
         return self.selectBasicBatterStats(self, database, teamName, year, "*")
     
-    def selectBasicBatterStats(self, database, teamName, year, headers: list):
-        tableName = self.getTableNameBasicBatterStats(teamName, year)
-        selectCmd = stats_database_utility.getSelectCmd(tableName, headers)
-        #print(selectCmd)
-        allDatabaseEntries = database.execute(selectCmd)
-        databaseData = allDatabaseEntries.fetchall()
-        if(len(headers) == 1):
-            databaseDataSingleVals = []
-            for (tupleVal) in databaseData:
-                #print(tupleVal[0])
-                databaseDataSingleVals.append(tupleVal[0]) 
-            return databaseDataSingleVals    
-        else:     
-            return(databaseData)
+    def selectBasicBatterStats(self, teamName, year, headers: list):
+        with sqlite3.connect(self.databaseFileName) as database:
+            tableName = self.getTableNameBasicBatterStats(teamName, year)
+            selectCmd = stats_database_utility.getSelectCmd(tableName, headers)
+            #print(selectCmd)
+            allDatabaseEntries = database.execute(selectCmd)
+            database.commit()
+            #NOTE: if you add any database.execute commands after this point, don't forget to add line database.commit()
+            databaseData = allDatabaseEntries.fetchall()
+            if(len(headers) == 1):
+                databaseDataSingleVals = []
+                for (tupleVal) in databaseData:
+                    #print(tupleVal[0])
+                    databaseDataSingleVals.append(tupleVal[0]) 
+                return databaseDataSingleVals    
+            else:   
+                return(databaseData)
+        
     
-with sqlite3.connect('baseballStats.db') as statsDb:
-    thisDatabaseManager = DatabaseManager()
-    #thisDatabaseManager.uploadTeamBasicBatterStats(statsDb, "White Sox", "2023")
-    
-    #thisDatabaseManager.uploadTeamContracts(statsDb, "Red Sox")
-    #thisDatabaseManager.uploadAllTeamsContracts(statsDb)
-    #thisDatabaseManager.uploadAllTeamsBasicBatterStats(statsDb, "2023")
-    
-    #statsDb.commit()
+
 
 
    
