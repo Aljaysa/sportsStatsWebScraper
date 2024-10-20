@@ -1,4 +1,3 @@
-from typing_extensions import final
 import ast, re
 
 
@@ -39,7 +38,6 @@ teams = [
 ('Toronto', 'Blue Jays', 3) 
 """
 
-@final
 class StatsDatabaseUtility:
     """A class to manage data (insert, delete, select, etc) in an SQL database
     """

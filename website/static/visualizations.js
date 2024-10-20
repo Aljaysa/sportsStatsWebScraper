@@ -4,37 +4,13 @@ $( "document" ).ready( function setStatsVisAttr(){
     statsVis.title = "Graph: White Sox 2023 Age Vs OPSPLUS";
 });
 
-//GET
-// fetch('/hello')
-//     .then(function (response) {
-//         return response.text();
-//     }).then(function (text) {
-//         console.log('GET response text:');
-//         console.log(text); // Print the greeting as text
-//     });
+fetch('/visualizations/graph?graph-type=scatterplot&x-axis=OPSPLUS')
+    .then(function (response) {
+        return response.text();
+    }).then(function (text) {
+        console.log('GET response text:');
+        console.log(text); // Print the greeting as text
+    });
 
-// POST
-fetch('/hello', {
 
-    // Specify the method
-    method: 'POST',
-
-    // JSON
-    headers: {
-        'Content-Type': 'application/json'
-    },
-
-    // A JSON payload
-    body: JSON.stringify({
-        "greeting": "Hello from the browser!"
-    })
-}).then(function (response) { // At this point, Flask has printed our JSON
-    return response.text();
-}).then(function (text) {
-
-    console.log('POST response: ');
-
-    // Should be 'OK' if everything was successful
-    console.log(text);
-});
 

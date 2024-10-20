@@ -1,15 +1,28 @@
 import sqlite3
+from dataclasses import dataclass
+from enum import Enum
 
 from stats_database_utility import StatsDatabaseUtility as StatsDatabaseUtility
 from stats_scraper import StatsScraper as StatsScraper
 from stats_scraper import BaseballStatsScraper as BaseballStatsScraper
 from stats_scraper import BasketballStatsScraper as BasketballStatsScraper
-from stats_visualizer import StatsVisualizer
+from stats_visualizer import StatsVisualizer, ScatterplotInfo
+
+class GraphType(Enum):
+    SCATTERPLOT = 1
+
+@dataclass
+class GraphInfo:
+    teamName: str
+    year: int
+    xHeaderName: str
+    yHeaderName: str
+    graphType: GraphType
 
 class DatabaseStatsScraperManager():
     """A class to coordinate the scraping of data from sports stats websites and the uploading and management of those stats in an SQL database
     """
-    statsVisSavePath = 'website\embeddedHTML\statsGraphs\\'  
+    statsVisSavePath = 'website\static\embeddedHTML\statsGraphs\\'  
     
     def __init__(self):
         self.baseballStatsScraper = BaseballStatsScraper()
@@ -99,23 +112,25 @@ class DatabaseStatsScraperManager():
                 floatList.append(float(0))
         return floatList
             
+    # def makeGraphHTMLFileName(self, )
        
-    def makeBasicBatterStatsScatterplotHTML(self, teamName, year, xHeaderName, yHeaderName):
-        yData = self.selectBasicBatterStats(statsDb, teamName, year, [yHeaderName])
-        xData = self.selectBasicBatterStats(statsDb, teamName, year, [xHeaderName])
-        names = self.selectBasicBatterStats(statsDb, teamName, year, ["Name"])
-        teamNameWithoutSpaces = teamName.replace(" ", "")
-        htmlFileName = f"{DatabaseStatsScraperManager.statsVisSavePath}{teamNameWithoutSpaces}{year}{xHeaderName}Vs{yHeaderName}.html"
-        graphTitle = f"{teamName} Batters {year} {xHeaderName} vs {yHeaderName}"
+    def makeGraphHTML(self, graphInfo: GraphInfo):
+        yData = self.selectBasicBatterStats(statsDb, graphInfo.teamName, graphInfo.year, [yHeaderName])
+        xData = self.selectBasicBatterStats(statsDb, graphInfo.teamName, graphInfo.year, [xHeaderName])
+        names = self.selectBasicBatterStats(statsDb, graphInfo.teamName, graphInfo.year, ["Name"])
+        teamNameWithoutSpaces = graphInfo.teamName.replace(" ", "")
+        htmlFileName = f"{DatabaseStatsScraperManager.statsVisSavePath}{teamNameWithoutSpaces}{graphInfo.year}{xHeaderName}Vs{yHeaderName}.html"
+        graphTitle = f"{graphInfo.teamName} Batters {graphInfo.year} {xHeaderName} vs {yHeaderName}"
         
         MAX_SCATTERPLOT_ENTRIES = 12
         if(len(xData) > MAX_SCATTERPLOT_ENTRIES):
-            xData = xData[:MAX_SCATTERPLOT_ENTRIES] #cut the list so that it is only 10 elements because as of now, I only want to show up to 10 elements due to it being difficult for each element (dot) to be it's own unique color
+            xData = xData[:MAX_SCATTERPLOT_ENTRIES] #cut the list so that it is only the amount elements equal to MAX_SCATTERPLOT_ENTRIES because as of now, I only want to show up to this many elements due to it being difficult for each element (dot) to be it's own unique color
             yData = yData[:MAX_SCATTERPLOT_ENTRIES]
             names = names[:MAX_SCATTERPLOT_ENTRIES]
             
         with open(htmlFileName, mode="w") as file:
-            file.write(StatsVisualizer.makeScatterplotHTML(DatabaseStatsScraperManager.convertStringsToFloats(xData), DatabaseStatsScraperManager.convertStringsToFloats(yData), xHeaderName, yHeaderName, graphTitle, names))
+            args = ScatterplotInfo(DatabaseStatsScraperManager.convertStringsToFloats(xData), DatabaseStatsScraperManager.convertStringsToFloats(yData), xHeaderName, yHeaderName, graphTitle, names)
+            file.write(StatsVisualizer.makeScatterplotHTML(args))
     
 with sqlite3.connect('baseballStats.db') as statsDb:
     thisDatabaseStatsScraperManager = DatabaseStatsScraperManager()
@@ -128,7 +143,8 @@ with sqlite3.connect('baseballStats.db') as statsDb:
     #statsDb.commit()
     xHeaderName = "Age"
     yHeaderName = "OPSPLUS"
-    thisDatabaseStatsScraperManager.makeBasicBatterStatsScatterplotHTML("White Sox", "2023", xHeaderName, yHeaderName)
+    scatterplotArgs = GraphInfo("White Sox", "2023", xHeaderName, yHeaderName, GraphType.SCATTERPLOT) 
+    thisDatabaseStatsScraperManager.makeGraphHTML(scatterplotArgs)
     
    
    
