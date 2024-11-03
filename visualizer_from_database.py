@@ -60,4 +60,5 @@ def generateGraphHTMLUsingDatabase(databaseFileName, teamName, year, xAxis, yAxi
     graphInfo = GraphInfo(teamName, year, xAxis, yAxis, graphType) 
     thisDatabaseManager = DatabaseManager(databaseFileName)
     generateGraphHTML(thisDatabaseManager, graphInfo)
+    # update database if possible with up to date stats for the team and year requested, if not, throw exception
     

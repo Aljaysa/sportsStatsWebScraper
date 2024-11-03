@@ -21,62 +21,64 @@ class DatabaseManager:
         tableName = f"{teamNameWithoutSpaces}{year}BasicBatterStats"
         return tableName
 
-    def uploadTeamBasicBatterStats(self, database, teamName, year):   
+    def uploadTeamBasicBatterStats(self, teamName, year):   
         """Adds every player from a baseball team's basic batter stats on its team's main page to a database
         Args:
             database (sqlite3.Connection): database to upload to
             teamName (str): name of the sports team (ie. "Red Sox" for Boston)
             year (str or int): year of the season to get the stats for
-        """        
-        tableName = self.getTableNameBasicBatterStats(teamName, year)
-        headers = stats_database_utility.formatTableHeaders(self.baseballStatsScraper.getTeamBatterHeaders(teamName, year))
-        stats = self.baseballStatsScraper.getTeamBatterStats(teamName, year)
-        #stats removeAllBlankRows
-        headerTypes = stats_database_utility.getInferredTypesFromStrings(stats[0])
-        createTableCmd = stats_database_utility.getCreateTableCmd(tableName, headers, headerTypes)
-        try:
-            database.execute(stats_database_utility.getDropTableCmd(tableName))
-        except sqlite3.OperationalError: #don't delete table if it doesn't exist
-            pass
-        database.execute(createTableCmd)
-        insertIntoTableCmd = stats_database_utility.getInsertIntoCmd(tableName, headers)
-        for statRow in stats:
-            database.execute(insertIntoTableCmd, statRow)
-        database.commit()
+        """      
+        with sqlite3.connect(self.databaseFileName) as database:  
+            tableName = self.getTableNameBasicBatterStats(teamName, year)
+            headers = stats_database_utility.formatTableHeaders(self.baseballStatsScraper.getTeamBatterHeaders(teamName, year))
+            stats = self.baseballStatsScraper.getTeamBatterStats(teamName, year)
+            #stats removeAllBlankRows
+            headerTypes = stats_database_utility.getInferredTypesFromStrings(stats[0])
+            createTableCmd = stats_database_utility.getCreateTableCmd(tableName, headers, headerTypes)
+            try:
+                database.execute(stats_database_utility.getDropTableCmd(tableName))
+            except sqlite3.OperationalError: #don't delete table if it doesn't exist
+                pass
+            database.execute(createTableCmd)
+            insertIntoTableCmd = stats_database_utility.getInsertIntoCmd(tableName, headers)
+            for statRow in stats:
+                database.execute(insertIntoTableCmd, statRow)
+            database.commit()
             
-    def uploadTeamContracts(self, database, teamName):   
-        tableName = f"{teamName.capitalize()}Contracts"
-        headers = stats_database_utility.formatTableHeaders(self.baseballStatsScraper.getTeamContractHeaders(teamName))
-        stats = self.baseballStatsScraper.getTeamContractStats(teamName)
-        headerTypes = stats_database_utility.getInferredTypesFromStrings(stats[0])
-        createTableCmd = stats_database_utility.getCreateTableCmd(tableName, headers, headerTypes)
-        try:
-            database.execute(stats_database_utility.getDropTableCmd(tableName))
-        except sqlite3.OperationalError: #don't delete table if it doesn't exist
-            pass
-        database.execute(createTableCmd)
-        insertIntoTableCmd = stats_database_utility.getInsertIntoCmd(tableName, headers)
-        for statRow in stats:
-            #print(statRow)
-            database.execute(insertIntoTableCmd, statRow)
-        database.commit()
+    def uploadTeamContracts(self, teamName):   
+        with sqlite3.connect(self.databaseFileName) as database:  
+            tableName = f"{teamName.capitalize()}Contracts"
+            headers = stats_database_utility.formatTableHeaders(self.baseballStatsScraper.getTeamContractHeaders(teamName))
+            stats = self.baseballStatsScraper.getTeamContractStats(teamName)
+            headerTypes = stats_database_utility.getInferredTypesFromStrings(stats[0])
+            createTableCmd = stats_database_utility.getCreateTableCmd(tableName, headers, headerTypes)
+            try:
+                database.execute(stats_database_utility.getDropTableCmd(tableName))
+            except sqlite3.OperationalError: #don't delete table if it doesn't exist
+                pass
+            database.execute(createTableCmd)
+            insertIntoTableCmd = stats_database_utility.getInsertIntoCmd(tableName, headers)
+            for statRow in stats:
+                #print(statRow)
+                database.execute(insertIntoTableCmd, statRow)
+            database.commit()
             
-    def uploadAllTeamsContracts(self, database):
+    def uploadAllTeamsContracts(self):
         for teamName in self.baseballStatsScraper._teamCities:
             try:
-                self.uploadTeamContracts(database, teamName)
+                self.uploadTeamContracts(teamName)
             except Exception as e:
                 print(f"{teamName}: {e}")
                 
-    def uploadAllTeamsBasicBatterStats(self, database, year):
+    def uploadAllTeamsBasicBatterStats(self, year):
         for teamName in self.baseballStatsScraper._teamCities:
             try:
-                self.uploadTeamBasicBatterStats(database, teamName, year)
+                self.uploadTeamBasicBatterStats(teamName, year)
             except Exception as e:
                 print(f"{teamName}: {e}")
     
-    def selectAllBasicBatterStats(self, database, teamName, year):
-        return self.selectBasicBatterStats(self, database, teamName, year, "*")
+    def selectAllBasicBatterStats(self, teamName, year):
+        return self.selectBasicBatterStats(self, teamName, year, "*")
     
     def selectBasicBatterStats(self, teamName, year, headers: list):
         with sqlite3.connect(self.databaseFileName) as database:

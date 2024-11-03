@@ -21,7 +21,6 @@ def theeDevJourney():
 def getVisualizationsGraph():
     if request.method == 'GET':
         try:
-            print("got here")
             urlArgs = request.args
             if (urlArgs["graph_type"] == "scatterplot"):
                 graphType = GraphType.SCATTERPLOT
@@ -29,7 +28,7 @@ def getVisualizationsGraph():
             if (urlArgs["team"] == "white_sox"):
                 team = "White Sox"
             visualizer_from_database.generateGraphHTMLUsingDatabase("baseballStats.db", team, urlArgs["year"], urlArgs["x_axis"], urlArgs["y_axis"], graphType)
-            return send_file('static/embeddedHTML/statsGraphs/WhiteSox2023ageVsOPSPLUS.html')
+            return send_file('static/embeddedHTML/statsGraphs/Yankees2023ageVsOPSPLUS.html')
         except Exception as e:
             return str(e)
         
