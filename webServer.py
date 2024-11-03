@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, send_file
 import visualizer_from_database
 from visualizer_from_database import GraphInfo, GraphType
 
@@ -21,12 +21,17 @@ def theeDevJourney():
 def getVisualizationsGraph():
     if request.method == 'GET':
         try:
-            message = {'greeting':request.full_path.split("?", 1)[1]}
-            scatterplotArgs = GraphInfo("White Sox", "2023", "Age", "OPSPLUS", GraphType.SCATTERPLOT) 
-            visualizer_from_database.generateGraphHTMLUsingDatabase("baseballStats.db", scatterplotArgs)
-            return message
+            print("got here")
+            urlArgs = request.args
+            if (urlArgs["graph_type"] == "scatterplot"):
+                graphType = GraphType.SCATTERPLOT
+                
+            if (urlArgs["team"] == "white_sox"):
+                team = "White Sox"
+            visualizer_from_database.generateGraphHTMLUsingDatabase("baseballStats.db", team, urlArgs["year"], urlArgs["x_axis"], urlArgs["y_axis"], graphType)
+            return send_file('static/embeddedHTML/statsGraphs/WhiteSox2023ageVsOPSPLUS.html')
         except Exception as e:
-            return e
+            return str(e)
         
     
 if __name__ == "__main__":

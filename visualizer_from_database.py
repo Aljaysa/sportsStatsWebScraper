@@ -56,7 +56,8 @@ def generateGraphHTML(databaseManager: DatabaseManager, graphInfo: GraphInfo):
               
           
           
-def generateGraphHTMLUsingDatabase(databaseFileName, graphInfo: GraphInfo):      
+def generateGraphHTMLUsingDatabase(databaseFileName, teamName, year, xAxis, yAxis, graphType):      
+    graphInfo = GraphInfo(teamName, year, xAxis, yAxis, graphType) 
     thisDatabaseManager = DatabaseManager(databaseFileName)
     generateGraphHTML(thisDatabaseManager, graphInfo)
     

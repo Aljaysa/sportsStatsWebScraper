@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <title> Sports Stats Vis </title>
     <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
-    <script type="text/javascript" src="static/visualizations.js"></script>
-    <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='styles-visualizations.css')}}">
+    <script type="text/javascript" src="../static/visualizations.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles-visualizations.css')}}">
 </head>
 <body>
     <div class ="main">
@@ -30,7 +30,7 @@
         </div>
         <div class="main-portion-page">
             <h1> Title </h1>
-            <embed id="stats-vis" type="text/html" src="" width="800" height="600" title="statistics graph"> <!-- src attribute will be set dynamically in javascript file -->
+            <iframe id="stats-vis" src="" width="800" height="600" title="statistics graph"> <!-- src attribute will be set dynamically in javascript file -->
         </div>
     </div>
     
