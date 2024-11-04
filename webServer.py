@@ -7,7 +7,9 @@ import traceback
 app = Flask(__name__)
 
 databaseName = "baseballStats.db"
-
+urlArgToGraphTypeBindings = dict([
+    ("scatterplot", GraphType.SCATTERPLOT),
+])
 
 @app.route("/")
 def home():
@@ -27,29 +29,36 @@ def getVisualizationsGraph():
     if request.method == 'GET':
         try:
             urlArgs = request.args
-            if (urlArgs["graph_type"] == "scatterplot"):
-                graphType = GraphType.SCATTERPLOT
-                
-            if (urlArgs["team"] == "white_sox"):
-                team = "White Sox"
-            visualizer_from_database.generateGraphHTMLUsingUpdatedDatabase(databaseName, team, urlArgs["year"], urlArgs["x_axis"], urlArgs["y_axis"], graphType)
-            return send_file('static/embeddedHTML/statsGraphs/Yankees2023ageVsOPSPLUS.html')
+            visualizer_from_database.generateGraphHTMLUsingUpdatedDatabase(databaseName, teamNameUrlArgFormatToWebServerFormat(urlArgs["team"]), urlArgs["year"], urlArgs["x_axis"],urlArgs["y_axis"], urlArgToGraphTypeBindings[urlArgs["graph_type"]])
+            graphFileName = visualizer_from_database.getGraphHTMLFileName(GraphInfo(teamNameUrlArgFormatToWebServerFormat(urlArgs["team"]), urlArgs["year"], urlArgs["x_axis"] ,urlArgs["y_axis"], urlArgToGraphTypeBindings[urlArgs["graph_type"]]))
+            return send_file(graphFileName)
         except DatabaseUpdateFailedException as e:
             traceback.print_exc()
-            returnGenerateGraphHTMLUsingNonUpdatedDatabase(team, urlArgs, graphType)
+            return returnGeneratedGraphHTMLUsingNonUpdatedDatabase(urlArgs)
         except Exception as e:
             traceback.print_exc()
             errorMsg = traceback.format_exc()
             return str(errorMsg)
         
-def returnGenerateGraphHTMLUsingNonUpdatedDatabase(team, urlArgs, graphType):
+def returnGeneratedGraphHTMLUsingNonUpdatedDatabase(urlArgs):
     try:
-        visualizer_from_database.generateGraphHTMLUsingNonUpdatedDatabase(databaseName, team, urlArgs["year"], urlArgs["x_axis"], urlArgs["y_axis"], graphType)
-        return send_file('static/embeddedHTML/statsGraphs/Yankees2023ageVsOPSPLUS.html')
+        graphFileName = visualizer_from_database.getGraphHTMLFileName(GraphInfo(teamNameUrlArgFormatToWebServerFormat(urlArgs["team"]), urlArgs["year"], urlArgs["x_axis"], urlArgs["y_axis"], urlArgToGraphTypeBindings[urlArgs["graph_type"]]))
+        visualizer_from_database.generateGraphHTMLUsingNonUpdatedDatabase(databaseName, teamNameUrlArgFormatToWebServerFormat(urlArgs["team"]), urlArgs["year"], urlArgs["x_axis"], urlArgs["y_axis"], urlArgToGraphTypeBindings[urlArgs["graph_type"]])
+        return send_file(graphFileName)
     except:
         traceback.print_exc()
         errorMsg = traceback.format_exc()
         return str(errorMsg)
+    
+def teamNameUrlArgFormatToWebServerFormat(urlArgFormattedTeam):
+    teamWords = urlArgFormattedTeam.split("_")
+    webServerFormattedTeam = ""
+    for idx, word in enumerate(teamWords):
+        if(idx >= 1): #want to add spaces to separate words (ex: "Red Sox") but the first word should not have a space in front of it 
+            webServerFormattedTeam = webServerFormattedTeam + " "
+        webServerFormattedTeam = webServerFormattedTeam + word.capitalize()
+    return webServerFormattedTeam
+
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)

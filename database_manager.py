@@ -31,24 +31,16 @@ class DatabaseManager:
         with sqlite3.connect(self.databaseFileName) as database:  
             tableName = self.getTableNameBasicBatterStats(teamName, year)
             headers = stats_database_utility.formatTableHeaders(self.baseballStatsScraper.getTeamBatterHeaders(teamName, year))
-            #print(headers)
-            #print("\n")
             stats = self.baseballStatsScraper.getTeamBatterStats(teamName, year)
-            #stats removeAllBlankRows
-            #print(stats[0])
             headerTypes = stats_database_utility.getInferredTypesFromStrings(stats[0])
-            #print(headerTypes)
             createTableCmd = stats_database_utility.getCreateTableCmd(tableName, headers, headerTypes)
-            #print(createTableCmd)
             try:
                 database.execute(stats_database_utility.getDropTableCmd(tableName))
             except sqlite3.OperationalError: #don't delete table if it doesn't exist
                 pass
             database.execute(createTableCmd)
-            #print(stats)
             insertIntoTableCmd = stats_database_utility.getInsertIntoCmd(tableName, headers)
             for statRow in stats:
-                #print(statRow)
                 database.execute(insertIntoTableCmd, statRow)
             database.commit()
             
@@ -90,7 +82,6 @@ class DatabaseManager:
         with sqlite3.connect(self.databaseFileName) as database:
             tableName = self.getTableNameBasicBatterStats(teamName, year)
             selectCmd = stats_database_utility.getSelectCmd(tableName, headers)
-            #print(selectCmd)
             allDatabaseEntries = database.execute(selectCmd)
             database.commit()
             #NOTE: if you add any database.execute commands after this point, don't forget to add line database.commit()
@@ -98,7 +89,6 @@ class DatabaseManager:
             if(len(headers) == 1):
                 databaseDataSingleVals = []
                 for (tupleVal) in databaseData:
-                    #print(tupleVal[0])
                     databaseDataSingleVals.append(tupleVal[0]) 
                 return databaseDataSingleVals    
             else:   

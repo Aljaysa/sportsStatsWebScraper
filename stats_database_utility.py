@@ -220,8 +220,6 @@ def getInferredTypesFromStrings(strList: list[str]) -> list[type]:
             continue
         typeList.append(_returnInferredType(str))
         #print(f"{str}: {StatsScraper._returnInferredType(str)}")
-    #print(typeList)
-    #print(typeList)
     return typeList
 
 

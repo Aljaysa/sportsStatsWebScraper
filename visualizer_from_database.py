@@ -35,14 +35,16 @@ def convertStringsToFloats(strList):
             floatList.append(float(0))
     return floatList
         
-# def makeGraphHTMLFileName(self, )
+def getGraphHTMLFileName(graphInfo: GraphInfo):
+    teamNameWithoutSpaces = graphInfo.teamName.replace(" ", "")
+    return f"{_STATS_VIS_SAVE_PATH}{teamNameWithoutSpaces}{graphInfo.year}{graphInfo.xHeaderName}Vs{graphInfo.yHeaderName}.html"
+    
     
 def generateGraphHTML(databaseManager: DatabaseManager, graphInfo: GraphInfo):
     yData = databaseManager.selectBasicBatterStats(graphInfo.teamName, graphInfo.year, [graphInfo.yHeaderName])
     xData = databaseManager.selectBasicBatterStats(graphInfo.teamName, graphInfo.year, [graphInfo.xHeaderName])
     names = databaseManager.selectBasicBatterStats(graphInfo.teamName, graphInfo.year, [_PLAYER_NAME_COL_LABEL])
-    teamNameWithoutSpaces = graphInfo.teamName.replace(" ", "")
-    htmlFileName = f"{_STATS_VIS_SAVE_PATH}{teamNameWithoutSpaces}{graphInfo.year}{graphInfo.xHeaderName}Vs{graphInfo.yHeaderName}.html"
+    htmlFileName = getGraphHTMLFileName(graphInfo)
     graphTitle = f"{graphInfo.teamName} Batters {graphInfo.year} {graphInfo.xHeaderName} vs {graphInfo.yHeaderName}"
     
     MAX_SCATTERPLOT_ENTRIES = 12
