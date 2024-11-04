@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request, render_template, send_file
 import visualizer_from_database
-from visualizer_from_database import GraphInfo, GraphType
+from visualizer_from_database import GraphInfo, GraphType, DatabaseUpdateFailedException
+import traceback
+
 
 app = Flask(__name__)
 
@@ -27,10 +29,15 @@ def getVisualizationsGraph():
                 
             if (urlArgs["team"] == "white_sox"):
                 team = "White Sox"
-            visualizer_from_database.generateGraphHTMLUsingDatabase("baseballStats.db", team, urlArgs["year"], urlArgs["x_axis"], urlArgs["y_axis"], graphType)
+            visualizer_from_database.generateGraphHTMLUsingUpdatedDatabase("baseballStats.db", team, urlArgs["year"], urlArgs["x_axis"], urlArgs["y_axis"], graphType)
+            return send_file('static/embeddedHTML/statsGraphs/Yankees2023ageVsOPSPLUS.html')
+        except DatabaseUpdateFailedException as e:
+            traceback.print_exc()
             return send_file('static/embeddedHTML/statsGraphs/Yankees2023ageVsOPSPLUS.html')
         except Exception as e:
-            return str(e)
+            traceback.print_exc()
+            errorMsg = traceback.format_exc()
+            return str(errorMsg)
         
     
 if __name__ == "__main__":

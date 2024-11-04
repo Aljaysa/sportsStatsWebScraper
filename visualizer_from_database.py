@@ -54,11 +54,41 @@ def generateGraphHTML(databaseManager: DatabaseManager, graphInfo: GraphInfo):
         args = ScatterplotInfo(convertStringsToFloats(xData), convertStringsToFloats(yData), graphInfo.xHeaderName, graphInfo.yHeaderName, graphTitle, names)
         file.write(stats_visualizer.makeScatterplotHTML(args))
               
+ 
           
-          
-def generateGraphHTMLUsingDatabase(databaseFileName, teamName, year, xAxis, yAxis, graphType):      
+def generateGraphHTMLUsingUpdatedDatabase(databaseFileName, teamName, year, xAxis, yAxis, graphType):      
     graphInfo = GraphInfo(teamName, year, xAxis, yAxis, graphType) 
     thisDatabaseManager = DatabaseManager(databaseFileName)
-    generateGraphHTML(thisDatabaseManager, graphInfo)
     # update database if possible with up to date stats for the team and year requested, if not, throw exception
+    try:
+        thisDatabaseManager.uploadTeamBasicBatterStats(teamName, year)
+    except Exception as e:
+        raise DatabaseUpdateFailedException() from e
+        
+    try:
+        generateGraphHTML(thisDatabaseManager, graphInfo)
+    except Exception as e:
+        raise GraphGenerationFailedException() from e
+        
+   
+def generateGraphHTMLUsingNonUpdatedDatabase(databaseFileName, teamName, year, xAxis, yAxis, graphType):   
+    graphInfo = GraphInfo(teamName, year, xAxis, yAxis, graphType) 
+    thisDatabaseManager = DatabaseManager(databaseFileName)
+    try:
+        generateGraphHTML(thisDatabaseManager, graphInfo)
+    except Exception as e:
+        raise GraphGenerationFailedException() from e
     
+class DatabaseUpdateFailedException(Exception):
+    def __init__(self, errors=None):            
+        # Call the base class constructor with the parameters it needs
+        super().__init__("Database failed to be updated, possibly due to an issue updated the database or scraping the data meant to be added to the database.")
+        # Now for your custom code...
+        self.errors = errors
+        
+class GraphGenerationFailedException(Exception):
+    def __init__(self, errors=None):            
+        # Call the base class constructor with the parameters it needs
+        super().__init__("Graph failed to be generated.")
+        # Now for your custom code...
+        self.errors = errors

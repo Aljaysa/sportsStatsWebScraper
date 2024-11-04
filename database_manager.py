@@ -31,17 +31,24 @@ class DatabaseManager:
         with sqlite3.connect(self.databaseFileName) as database:  
             tableName = self.getTableNameBasicBatterStats(teamName, year)
             headers = stats_database_utility.formatTableHeaders(self.baseballStatsScraper.getTeamBatterHeaders(teamName, year))
+            #print(headers)
+            #print("\n")
             stats = self.baseballStatsScraper.getTeamBatterStats(teamName, year)
             #stats removeAllBlankRows
+            #print(stats[0])
             headerTypes = stats_database_utility.getInferredTypesFromStrings(stats[0])
+            #print(headerTypes)
             createTableCmd = stats_database_utility.getCreateTableCmd(tableName, headers, headerTypes)
+            #print(createTableCmd)
             try:
                 database.execute(stats_database_utility.getDropTableCmd(tableName))
             except sqlite3.OperationalError: #don't delete table if it doesn't exist
                 pass
             database.execute(createTableCmd)
+            #print(stats)
             insertIntoTableCmd = stats_database_utility.getInsertIntoCmd(tableName, headers)
             for statRow in stats:
+                #print(statRow)
                 database.execute(insertIntoTableCmd, statRow)
             database.commit()
             
@@ -59,7 +66,6 @@ class DatabaseManager:
             database.execute(createTableCmd)
             insertIntoTableCmd = stats_database_utility.getInsertIntoCmd(tableName, headers)
             for statRow in stats:
-                #print(statRow)
                 database.execute(insertIntoTableCmd, statRow)
             database.commit()
             
@@ -97,8 +103,10 @@ class DatabaseManager:
                 return databaseDataSingleVals    
             else:   
                 return(databaseData)
-        
-    
+     
+#For testing:
+# thisDatabaseManager = DatabaseManager("baseballStats.db")   
+# thisDatabaseManager.uploadTeamBasicBatterStats("Twins", "2023") 
 
 
 

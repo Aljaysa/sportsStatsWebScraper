@@ -4,6 +4,7 @@ import inspect
 from abc import ABC, abstractmethod 
 from enum import Enum
 import sys
+import re
 
 class StatsScraper(ABC):
     """A class to gets the stats and data of a sports stat website into data types like lists
@@ -75,14 +76,16 @@ class StatsScraper(ABC):
         Returns:
             BeautifulSoup: the desired table that like it's parent, is also a tree of html elements/BeautifulSoup objects
         """        
-        #table = soup.find("body").find("div", id="wrap").find("div", id="content")#.find("div", id="all_team_batting").find("div", id="table_container is_setup").find("table", id="team_batting")
+        #table = soup.find("body").find("div", id="wrap").find("div", id="content")#.find("div", id="players_standard_batting").find("div", id="table_container is_setup").find("table", id="players_standard_batting")
         table = soup.find("table", id=tableID)
         if(table is None):
             blockedBySiteMsg = soup.find("body").find("div", id="wrap").find("div", id="content")
             #print(blockedBySiteMsg)
-            raise BlockedBySiteException(blockedBySiteMsg)
+            raise TableNotFoundException(blockedBySiteMsg)
         #print(table)
         return table
+        
+     
         
     def _getHeadersFromTable(self, soup, tableID): 
         """Gets a list of headers of a table on a webpage
@@ -99,7 +102,9 @@ class StatsScraper(ABC):
         #out.write(soup.prettify())
         fullTable = self._getTable(soup, tableID)
         #print(fullTable) #uncomment this line to see the html for the table
-        headersRowWebData = fullTable.find("thead").find().find_all("th") # the extra .find() is to probe into the <tr> html element: <thead> <tr> {All the Header data is here} </tr> </thead> ... so we need to probe into the <tr> as well as the <thead> before we can get to the header data. Then, the .contents is to get all of the headers (<th> and <td> elements) in a list
+        def stat_selector(tag):
+            return tag.name == "th" or tag.name == "td"
+        headersRowWebData = fullTable.find("thead").find().find_all(stat_selector) # the extra .find() is to probe into the <tr> html element: <thead> <tr> {All the Header data is here} </tr> </thead> ... so we need to probe into the <tr> as well as the <thead> before we can get to the header data. Then, the .contents is to get all of the headers (<th> and <td> elements) in a list
         for dataCellWebData in headersRowWebData:
             headers.append(dataCellWebData.text) #surround this in try block later because maybe element doesn't have .text attribute?
         return headers
@@ -115,22 +120,25 @@ class StatsScraper(ABC):
         """        
         fullTable = self._getTable(soup, tableID)
         justPlayersStatsTable = fullTable.find("tbody")
-        playersRows = justPlayersStatsTable.findAll("tr", class_=lambda x : x != "thead")
+        playersRows = justPlayersStatsTable.findAll("tr", class_=lambda x : x != "thead") #"tr", class_=lambda x : x != "thead"
         #print(playersRows)
-        if posToOmit: #if list is not empty
-            playersRowsPosOmitted = []
-            try: #try block is to provide the same list of player rows as before but with all players with a given position removed
-                for row in playersRows:
-                    pos = row.find("td", {'data-stat':'pos'})
-                    #print(pos.string)
-                    if(pos.string not in posToOmit):
-                        playersRowsPosOmitted.append(row) 
-                playersRows = playersRowsPosOmitted
-            except AttributeError: #if row doesn't have a 'pos' attribute so can't even check its value to check position
-                pass 
+        # if posToOmit: #if list is not empty #currently commented out as it overcomplicated things but the purpose of this block is to have pitches ommitted from the batters stats
+            # playersRowsPosOmitted = []
+            # try: #try block is to provide the same list of player rows as before but with all players with a given position removed
+            #     for row in playersRows:
+            #         pos = row.find("td", {'data-stat':'pos'})
+            #         #print(pos.string)
+            #         if(pos.string not in posToOmit):
+            #             playersRowsPosOmitted.append(row) 
+            #     playersRows = playersRowsPosOmitted
+            # except AttributeError: #if row doesn't have a 'pos' attribute so can't even check its value to check position
+            #     pass 
         playersStats = []
         for thisPlayer in playersRows: #now that we have all player's BeautifulSoup objs in a list, extract the stats
-            thisPlayerStatsWebData = thisPlayer.contents # this gets mostly <td> elements. currently, "th" elements are also included so that the "rank" col in many baseball reference graphs are included for instance. This is because .contents gets all children of a given html element, regardless of what tag it has (<td>, <th>, etc.)
+            def stat_selector(tag):
+                return tag.name == "th" or tag.name == "td"
+            thisPlayerStatsWebData = thisPlayer.find_all(stat_selector) # .contents instead of find_all("td")  gets all <td> elements and "th" elements are also included so that the "rank" col in many baseball reference graphs are included for instance. This is because .contents gets all children of a given html element, regardless of what tag it has (<td>, <th>, etc.). We don't want this however as .contents was returning " " blank elements for some reason
+            #print(thisPlayerStatsWebData)
             thisPlayerStatsNum = StatsScraper._getStatsInRow(thisPlayerStatsWebData)
             if(len(thisPlayerStatsNum) != 0):
                 playersStats.append(thisPlayerStatsNum)
@@ -359,7 +367,7 @@ class BaseballStatsScraper(StatsScraper):
             list: a list of strings representing the header columns of the table
         """ 
         soup = self._getSoupTeamStats(teamName, year)
-        tableID = "team_batting" #payroll
+        tableID = "players_standard_batting" #payroll
         return self._getHeadersFromTable(soup, tableID)
         
     def getTeamBatterStats(self, teamName: str, year: str) -> list[str]:
@@ -371,7 +379,7 @@ class BaseballStatsScraper(StatsScraper):
             list: a list (2D if there are multiple rows not including the header row) of stats (strings) from the table
         """ 
         soup = self._getSoupTeamStats(teamName, year)
-        tableID = "team_batting"
+        tableID = "players_standard_batting"
         return self._getStatsFromTable(soup, tableID, ["P"]) 
     
     def getTeamContractHeaders(self, teamName: str) -> list[str]:
@@ -421,9 +429,9 @@ class BasketballStatsScraper(StatsScraper):
         tableID = "per_game"
         return self._getStatsFromTable(teamName, year, tableID)
         
-class BlockedBySiteException(Exception):
+class TableNotFoundException(Exception):
     def __init__(self, message, errors=None):            
         # Call the base class constructor with the parameters it needs
-        super().__init__(message)
+        super().__init__("Table while scraping HTML file was not found, possibly due to the ID of the table given being being incorrect, or the website blocking webscrapers/bots, etc. This is the data that was returned after tried to get your desired table: " + message)
         # Now for your custom code...
         self.errors = errors

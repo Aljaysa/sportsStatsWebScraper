@@ -109,6 +109,7 @@ def _getCreateTableHeaderDecls(headerNames, headerTypes):
         str: the next string of the code in a series of (ie. possibly multiple) headers/variables being declared in an SQL Create Table statement. No comma is added at the end of the command. Ex: "pitcherId INTEGER NOT NULL PRIMARY KEY"
     """        
     for (headerName, headerType) in zip(headerNames, headerTypes):
+        #print(headerName + " " + str(headerType) + "\n")
         yield _getCreateTableHeaderDecl(headerName, headerType)
 
 
@@ -169,19 +170,39 @@ def getInsertIntoCmd(tableName, headerNames):
     insertIntoCmd = insertIntoCmd + questionMarksCommaSep + ")"
     return insertIntoCmd    
 
-
+def _changeDuplicates(entriesMightHaveDuplicates):
+    """Takes a list of headers (strings) and changes any duplicate headers to have an integer concatenated at the end of them (if it is the second occurence, "2" will be concatednated) so that they are valid/they adhere to the naming constraints of database headers. For naming constraints, see: https://learn.microsoft.com/en-us/sql/relational-databases/databases/database-identifiers?view=sql-server-2017
+    Args:
+        entriesMightHaveDuplicates (list[str]): list of strings representing the SQL table headers
+    Returns:
+        list: list of strings, ie. the headers that don't have duplicates anymore 
+    """ 
+    entriesDuplicatesChanged = []
+    numOccurences = dict()
+    # create data structure that records how many occurrences there are of each entry in the input list. This will help us find which entries are duplicates 
+    # also, change duplicate entries to have a number at the end of it (if "member" is already in the input list, then the second occurrence will be changed to "member2")
+    for entry in entriesMightHaveDuplicates:
+        if(numOccurences.get(entry) is None):
+            numOccurences[entry] = 1 
+            entriesDuplicatesChanged.append(entry) 
+        else:
+            numOccurences[entry] = numOccurences[entry] + 1
+            entriesDuplicatesChanged.append(entry + str(numOccurences[entry])) # concatenating an integer at the end of the string
+    return entriesDuplicatesChanged
+    
 def formatTableHeaders(unformattedTableHeaders):
     """Takes a list of headers (strings) and formats them so that they are valid/they adhere to the naming constraints of database headers. For naming constraints, see: https://learn.microsoft.com/en-us/sql/relational-databases/databases/database-identifiers?view=sql-server-2017
     Args:
-        unformattedTableHeaders (list): list of strings representing the SQL table headers
+        unformattedTableHeaders ((list[str])): list of strings representing the SQL table headers
     Returns:
-        list: list of strings, ie. the formatted headers that adhere to the naming constraints of database headers 
+        (list[str]): list of strings, ie. the formatted headers that adhere to the naming constraints of database headers 
     """        
     formattedTableHeaders = []
     for header in unformattedTableHeaders:
         header = _getReplacedSpecialCharsStr(header)
         header = _addUnderscoreToStrFirstCharNum(header)
         formattedTableHeaders.append(header)
+    formattedTableHeaders = _changeDuplicates(formattedTableHeaders)
     return formattedTableHeaders
 
 
@@ -194,8 +215,12 @@ def getInferredTypesFromStrings(strList: list[str]) -> list[type]:
     """        
     typeList = [] 
     for str in strList:
+        if (str == ""):
+            typeList.append(type(" "))#returns type string. assumes that if the first row of a table has an empty val, then the type of that empty val/column is string but this isn't always the case. Im lazy so Im going to leave it like this for now, but this could introduce errors/bugs in the future
+            continue
         typeList.append(_returnInferredType(str))
         #print(f"{str}: {StatsScraper._returnInferredType(str)}")
+    #print(typeList)
     #print(typeList)
     return typeList
 
