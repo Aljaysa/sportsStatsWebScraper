@@ -23,6 +23,7 @@ class GraphInfo:
 
 
 _STATS_VIS_SAVE_PATH = 'static\embeddedHTML\statsGraphs\\' 
+_PLAYER_NAME_COL_LABEL = "Player"
 
 
 def convertStringsToFloats(strList):
@@ -39,7 +40,7 @@ def convertStringsToFloats(strList):
 def generateGraphHTML(databaseManager: DatabaseManager, graphInfo: GraphInfo):
     yData = databaseManager.selectBasicBatterStats(graphInfo.teamName, graphInfo.year, [graphInfo.yHeaderName])
     xData = databaseManager.selectBasicBatterStats(graphInfo.teamName, graphInfo.year, [graphInfo.xHeaderName])
-    names = databaseManager.selectBasicBatterStats(graphInfo.teamName, graphInfo.year, ["Name"])
+    names = databaseManager.selectBasicBatterStats(graphInfo.teamName, graphInfo.year, [_PLAYER_NAME_COL_LABEL])
     teamNameWithoutSpaces = graphInfo.teamName.replace(" ", "")
     htmlFileName = f"{_STATS_VIS_SAVE_PATH}{teamNameWithoutSpaces}{graphInfo.year}{graphInfo.xHeaderName}Vs{graphInfo.yHeaderName}.html"
     graphTitle = f"{graphInfo.teamName} Batters {graphInfo.year} {graphInfo.xHeaderName} vs {graphInfo.yHeaderName}"
@@ -92,3 +93,6 @@ class GraphGenerationFailedException(Exception):
         super().__init__("Graph failed to be generated.")
         # Now for your custom code...
         self.errors = errors
+
+#For testing purposes
+#generateGraphHTMLUsingUpdatedDatabase("baseballStats.db", "Blue Jays", "2023", "PA", "R", GraphType.SCATTERPLOT)

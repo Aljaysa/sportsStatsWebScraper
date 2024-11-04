@@ -6,6 +6,9 @@ import traceback
 
 app = Flask(__name__)
 
+databaseName = "baseballStats.db"
+
+
 @app.route("/")
 def home():
     return render_template("visualizations/visualizations.html")
@@ -29,16 +32,24 @@ def getVisualizationsGraph():
                 
             if (urlArgs["team"] == "white_sox"):
                 team = "White Sox"
-            visualizer_from_database.generateGraphHTMLUsingUpdatedDatabase("baseballStats.db", team, urlArgs["year"], urlArgs["x_axis"], urlArgs["y_axis"], graphType)
+            visualizer_from_database.generateGraphHTMLUsingUpdatedDatabase(databaseName, team, urlArgs["year"], urlArgs["x_axis"], urlArgs["y_axis"], graphType)
             return send_file('static/embeddedHTML/statsGraphs/Yankees2023ageVsOPSPLUS.html')
         except DatabaseUpdateFailedException as e:
             traceback.print_exc()
-            return send_file('static/embeddedHTML/statsGraphs/Yankees2023ageVsOPSPLUS.html')
+            returnGenerateGraphHTMLUsingNonUpdatedDatabase(team, urlArgs, graphType)
         except Exception as e:
             traceback.print_exc()
             errorMsg = traceback.format_exc()
             return str(errorMsg)
         
+def returnGenerateGraphHTMLUsingNonUpdatedDatabase(team, urlArgs, graphType):
+    try:
+        visualizer_from_database.generateGraphHTMLUsingNonUpdatedDatabase(databaseName, team, urlArgs["year"], urlArgs["x_axis"], urlArgs["y_axis"], graphType)
+        return send_file('static/embeddedHTML/statsGraphs/Yankees2023ageVsOPSPLUS.html')
+    except:
+        traceback.print_exc()
+        errorMsg = traceback.format_exc()
+        return str(errorMsg)
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
