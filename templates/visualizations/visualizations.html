@@ -20,8 +20,8 @@
         </nav> 
         <div class="sidebar"> 
             <ul>
-            <li class="sidebar-title"> Sidebar title </li>
-            <li class="sidebar-item"> list </li>
+            <li class="sidebar-title"> Visualizations </li>
+            <li class="sidebar-item"> Baseball </li>
             <li class="sidebar-item"> list </li>
             <li class="sidebar-item"> list </li>
             <li class="sidebar-item"> list </li>
@@ -29,7 +29,62 @@
             </ul>
         </div>
         <div class="main-portion-page">
-            <h1> Title </h1>
+            <h1> Baseball Stats Visualizer </h1>
+            <form id="stats-graph-user-parms">
+                <label for="team">Select a team:</label>
+                <select name="team" id="team">
+                    <option value="diamondbacks">Diamondbacks</option>
+                    <option value="braves">Braves</option>
+                    <option value="orioles">Orioles</option>
+                    <option value="red_sox">Red Sox</option>
+                    <option value="cubs">Cubs</option>
+                    <option value="white_sox">White Sox</option>
+                    <option value="reds">Reds</option>
+                    <option value="guardians">Guardians</option>
+                    <option value="rockies">Rockies</option>
+                    <option value="tigers">Tigers</option>
+                    <option value="marlins">Marlins</option>
+                    <option value="astros">Astros</option>
+                    <option value="royals">Royals</option>
+                    <option value="angels">Angels</option>
+                    <option value="dodgers">Dodgers</option>
+                    <option value="brewers">Brewers</option>
+                    <option value="twins">Twins</option>
+                    <option value="mets">Mets</option>
+                    <option value="yankees">Yankees</option>
+                    <option value="athletics">Athletics</option>
+                    <option value="phillies">Phillies</option>
+                    <option value="pirates">Pirates</option>
+                    <option value="padres">Padres</option>
+                    <option value="giants">Giants</option>
+                    <option value="mariners">Mariners</option>
+                    <option value="cardinals">Cardinals</option>
+                    <option value="rays">Rays</option>
+                    <option value="rangers">Rangers</option>
+                    <option value="blue_jays">Blue Jays</option>
+                    <option value="nationals">Nationals</option>
+                </select>
+                <br>
+
+                <label for="year">Select a year/season:</label>
+                <select name="year" id="year">
+                    <option value="2024">2024</option>
+                    <option value="2024">2023</option>
+                    <option value="2024">2022</option>
+                    <option value="2024">2021</option>
+                    <option value="2024">2020</option>
+                </select>
+                <br>
+
+                <label for="year">Select a position:</label>
+                <select name="position" id="position">
+                    <option value="batter">Batter</option>
+                </select>
+                <br>
+
+
+                <input type="button" value="Generate Graph" onclick=displayGraph()>
+            </form>
             <iframe id="stats-vis" src="" width="800" height="600" title="statistics graph"> <!-- src attribute will be set dynamically in javascript file -->
         </div>
     </div>
