@@ -127,8 +127,6 @@ a {
 
 .subtopnav .subtopnav-item, .subtopnav .subtopnav-dropdown-item {
     border: 1px;
-    border-style: solid;
-    border-color: rgb(0, 0, 0);
     width: auto;
     padding: 8px 12px 8px 12px;
     font-family:'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', 'sans-serif';
@@ -137,6 +135,12 @@ a {
     text-decoration: none;
     line-height: 1.5;*/
 }
+
+.subtopnav .subtopnav-item {
+    border-style: solid;
+    border-color: rgb(0, 0, 0);
+}
+
 /*
 .sidebar {
     position: fixed;
