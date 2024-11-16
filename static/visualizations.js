@@ -15,7 +15,7 @@ function displayBaseballVisGraph(){
 
 function getGraphURLParamsToRequestFromServer(userParams, graphType){ 
     let urlParamsToRequestFromServer = "?" + (new URLSearchParams(userParams)).toString();
-    // for(const pair of userParams.entries()){
+    // for(const pair of userParams.entries()){ // I found out that there is a function out there that exists and does this already for me
     //     urlParamsToRequestFromServer = urlParamsToRequestFromServer.concat(pair[0], "=", pair[1], "&");
     // }
     urlParamsToRequestFromServer = urlParamsToRequestFromServer.concat("&graph_type=", graphType);

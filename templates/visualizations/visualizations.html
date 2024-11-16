@@ -69,21 +69,84 @@
                 <label for="year">Select a year/season:</label>
                 <select name="year" id="year">
                     <option value="2024">2024</option>
-                    <option value="2024">2023</option>
-                    <option value="2024">2022</option>
-                    <option value="2024">2021</option>
-                    <option value="2024">2020</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
                 </select>
                 <br>
 
-                <label for="year">Select a position:</label>
+                <label for="position">Select a position:</label>
                 <select name="position" id="position">
                     <option value="batter">Batter</option>
                 </select>
                 <br>
 
+                <label for="x-axis">Select an x-axis stat:</label>
+                <select name="x_axis" id="x-axis">
+                    <option value="Pos">Position</option>
+                    <option value="Name">Name</option>
+                    <option value="G">Games</option>
+                    <option value="PA">Plate Appearances</option>
+                    <option value="AB">At Bats</option>
+                    <option value="R">Runs</option>
+                    <option value="H">Hits</option>
+                    <option value="_2B">Doubles</option>
+                    <option value="_3B">Triples</option>
+                    <option value="HR">Homeruns</option>
+                    <option value="RBI">Runs Batted In</option>
+                    <option value="SB">Stolen Bases</option>
+                    <option value="CS">Caught Stealing</option>
+                    <option value="BB">Walks</option>
+                    <option value="SO">Strikeouts</option>
+                    <option value="BA">Batting Average</option>
+                    <option value="OBP">On Base Percentage</option>
+                    <option value="SLG">Slugging Percentage</option>
+                    <option value="OPS">On Base Percentage Plus Slugging Percentage</option>
+                    <option value="OPSPLUS">On Base Percentage Plus Slugging Percentage+</option></option>
+                    <option value="TB">Total Bases</option>
+                    <option value="GDP">Times Gounded Out Into Double Play</option>
+                    <option value="HBP">Hit By Pitches</option>
+                    <option value="SH">Sacrifice Hits</option>
+                    <option value="SF">Sacrifice Flies</option>
+                    <option value="IBB">Intentional Base on Balls</option>
+                </select>
+                <br>
 
-                <input type="button" value="Generate Graph" onclick=displayGraph()>
+                <label for="y-axis">Select a y-axis stat:</label>
+                <select name="y_axis" id="y-axis">
+                    <option value="Pos">Position</option>
+                    <option value="Name">Name</option>
+                    <option value="G">Games</option>
+                    <option value="PA">Plate Appearances</option>
+                    <option value="AB">At Bats</option>
+                    <option value="R">Runs</option>
+                    <option value="H">Hits</option>
+                    <option value="_2B">Doubles</option>
+                    <option value="_3B">Triples</option>
+                    <option value="HR">Homeruns</option>
+                    <option value="RBI">Runs Batted In</option>
+                    <option value="SB">Stolen Bases</option>
+                    <option value="CS">Caught Stealing</option>
+                    <option value="BB">Walks</option>
+                    <option value="SO">Strikeouts</option>
+                    <option value="BA">Batting Average</option>
+                    <option value="OBP">On Base Percentage</option>
+                    <option value="SLG">Slugging Percentage</option>
+                    <option value="OPS">On Base Percentage Plus Slugging Percentage</option>
+                    <option value="OPSPLUS">On Base Percentage Plus Slugging Percentage+</option></option>
+                    <option value="TB">Total Bases</option>
+                    <option value="GDP">Times Gounded Out Into Double Play</option>
+                    <option value="HBP">Hit By Pitches</option>
+                    <option value="SH">Sacrifice Hits</option>
+                    <option value="SF">Sacrifice Flies</option>
+                    <option value="IBB">Intentional Base on Balls</option>
+                </select>
+                <br>
+                
+
+
+                <input type="button" value="Generate Graph" onclick=displayBaseballVisGraph()>
             </form>
             <iframe id="stats-vis" src="" width="800" height="600" title="statistics graph"> <!-- src attribute will be set dynamically in javascript file -->
         </div>
