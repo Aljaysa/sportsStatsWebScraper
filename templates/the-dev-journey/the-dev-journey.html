@@ -49,6 +49,7 @@
                         <p>Code Reuse,</p>
                         <p>Methods can call method with a name that's common in 2 or more classes and the behavior changes based on the type of object the method is called on,</p>
                         <p>Developers creating a statsScraper for a new type of sport have a base to work from,</p>
+                        <p>Code flexibility as developers will know that as long as object's type is subclass of parent class, it will be a valid input in all methods that use objects of the parent class</p>
                     </div>
                 </div>
             </div>
@@ -94,18 +95,18 @@
                     <img src="{{url_for('.static', filename='images/inheritance.png')}}" alt="inheritance">
                 </div>
                 <div class="tidbit-header-text">
-                    <h1 class="title"> Using Inheritance </h1>
+                    <h1 class="title"> Using Encapsulation To Hide Implementation Details from Calling Code/Client</h1>
                     <!-- <p class="linebreak"></p> -->
                     <div class="subtitle">
-                        <p>Example: teamCities = dict([</p>
+                        <p>Examples in the code: getTeamBatterStats() in stats_scraper.py</p>
                     </div>
                 </div>
             </div>
             <p>
-                Inheritance Description 1 Inheritance Description 1 
+                When I know a client/developer wants to for instance, grab the data from a certain table, but we need the table ID in order to do so, and you don't want the client to have to know/supply this table ID (which could change in the future anyway), I made a wrapper function that supplies that table ID and requires no arguments.
             </p>
             <p>
-                Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 
+                Python does not inherently support Making certain methods private but I used method names with a leading underscore to mark methods that should not be called outside of this class
             </p>
         </article>
     </div>
@@ -114,7 +115,9 @@
     <ul> Other Learning Outcomes of Note 
         <li>Using Dictionaries to Remove the Need for Switch Statments </li>
         <li>Documented some of the python files with Docstrings </li>
-
+        <li>Using parameter objects (wrapper objects) in place of long lists of arguments in methods </li>
+        <li>Using Docstring or python type hints when it is ambiguous as to what the type of an argument is </li>
+        <li>Use of css grid to create the layout of the mosaic tiles you see on this page, but used css flexbox to have text within the mosaic tiles stretch to fit the allocated area </li>
     </ul>
 </body>
 </html>

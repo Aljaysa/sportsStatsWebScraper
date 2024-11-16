@@ -20,7 +20,7 @@ def visualizations():
     return render_template("visualizations/visualizations.html")
 
 @app.route("/the-dev-journey")
-def theeDevJourney():
+def theDevJourney():
     return render_template("the-dev-journey/the-dev-journey.html")
 
 
