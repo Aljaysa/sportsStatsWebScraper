@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="{{url_for('.static', filename='styles-the-dev-journey.css')}}">
 </head>
 <body>
+    <h1 class="title"> Learning Outcomes I Encountered During the Development of this Project </h1>
     <div class="tidbit-tiles">
         <article class="tidbit-tile dark-background">
             <div class="tidbit-header">
@@ -40,25 +41,22 @@
                     <img src="{{url_for('.static', filename='images/inheritance.png')}}" alt="dictionary">
                 </div>
                 <div class="tidbit-header-text">
-                    <h1 class="title"> Using Inheritance </h1>
+                    <h1 class="title"> Using Inheritance for an IS-A Relationship</h1>
                     <!-- <p class="linebreak"></p> -->
                     <div class="subtitle">
-                        <p>Example: teamCities = dict([</p>
-                        <p>("Diamondbacks", "Arizona"),</p>
-                        <p>("Braves", "Atlanta"),</p>
-                        <p>("Orioles", "Baltimore"),</p>
-                        <p>("Red Sox", "Boston"),</p>
-                        <p>("Cubs", "Chicago"),</p>
-                        <p>("White Sox", "Chicago")</p>
-                        <p>])</p>
+                        <p>Benefits:</p>
+                        <p>DRY Principle,</p>
+                        <p>Code Reuse,</p>
+                        <p>Methods can call method with a name that's common in 2 or more classes and the behavior changes based on the type of object the method is called on,</p>
+                        <p>Developers creating a statsScraper for a new type of sport have a base to work from,</p>
                     </div>
                 </div>
             </div>
             <p>
-                Inheritance Description 1 Inheritance Description 1 Inheritance Description 1 Inheritance Description 1Inheritance Description 1 Inheritance Description 1 Inheritance Description 1
+                A parent class StatsScraper was created that requires in it's constructor all subclasses to supply common info between sports (team cities, url of the stats website etc.). The child classes' constructors then make use of this parent constructor. Where baseball and basketball differ however is in the type of stats used (homeruns is not a stat in basketball for example). Thus, the parent class leaves it up to the child classes to implement the methods to scrape those stats.
             </p>
             <p>
-                Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 
+                Note: the abc (Abstract Base Classes) python module was used in order to prevent the possibility of an instance of the parent class StatsScraper from being created as there should only be instances of the more specific subclasses being BaseballStatsScraper and BasketballStatsScraper  
             </p>
         </article>
 
@@ -111,5 +109,12 @@
             </p>
         </article>
     </div>
+    <h3>  </h3>
+    
+    <ul> Other Learning Outcomes of Note 
+        <li>Using Dictionaries to Remove the Need for Switch Statments </li>
+        <li>Documented some of the python files with Docstrings </li>
+
+    </ul>
 </body>
 </html>
