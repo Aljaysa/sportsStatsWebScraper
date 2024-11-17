@@ -114,6 +114,9 @@
         <p>
             That way, if database failed to be updated with sports stats (because the stats scraper failed or the updating the database failed), then a certain exception will be thrown and the browser will still try and generate the graph based on the current data in the database. However if that fails (possibly because the required data is not present in the database), then a different exception will be thrown and the browser will say there's been and error and not show the graph. 
         </p>
+        <p>
+            Certain exceptions are recovered from at lower levels in the code (like DatabaseUpdateFailedException), while other exceptions are recovered from/handled at higher levels in the code (like GraphGenerationFailedException which is handled right where the client's GET HTTP request comes in, and the Exception is sent back to the client)
+        </p>
         <br>
 
         <h3> Taking generic error messages and encapsulating them in custom exceptions with higher-level descriptions/names </h3>
@@ -144,6 +147,12 @@
         <p>
             Functions that get the headers from a table on the stats website and functions that get the actual stats from a table all need to retreive that table beautiful soup object before they can get their respective data so this process of getting the table object is it's own separate method. 
         </p>
+        <p>
+            Separating code like this into separate functions increases readability as that whole chunk of code can now have a title associated with it (the function name) 
+        </p>
+        <p>
+            Separating code like this into separate functions also adheres to the principle of every part of the code doing one thing and one thing only. 
+        </p>
         <br>
         
         <li>Using Dictionaries to Remove the Need for Switch Statments </li>
@@ -153,15 +162,15 @@
         <li>I realized that many different methods in database_manager.py all had the name of the database as an argument passed in and so in order to avoid repetition, I just made the name of the database as an instance variable.</li>
         <li>Using default args. For example, _getStatsFromTable in stats_scraper.py has an argument posToOmit=[] that allows you to specify position(s) to not get stats for but if you leave it empty, it will get stats for all positions.</li>
         <li>Using the fetch api to first request and retreive the initial webpage from the server, but then, to use url parameters to request the customized graph to be displayed</li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
+        <li>Had to make decisions on what data should the client webpage possess and what data should be receieved from the server. At the time of writing this, all of the values in the menu for selecting the stats to visualize are hard coded and so if the baseball reference table changes so that certain stats that used to be available are no longer available, then now, the website will not update to reflect that change. This means that you would be able to request a stat that is not available and you will get an error.</li>
+        <li>Used list splicing to in visualizer_from_database.py to only show a certain amount of players on the graph</li>
+        <li>Used "with" statments for resource allocation</li>
+        <li>Chose smart variable/function/class names: verbs for functions and questions for boolean variables. Module/class and function names were not so generic that they lack meaning, but not so specific that they are likely to change when functionality is expanded. No types in variable names. </li>
+        <li>Use of pythonic syntactic sugar such as enumerate(), split(), map() to simplify code </li>
+        <li>Dynamic updating of HTML element attributes using JavaScript. Actives upon the clicking of a button.</li>
+        <li>Use of const keyword and let keyword, depending on the situation, instead of always using var keyword.</li>
+        <li>Adding comments that remind myself and fellow developers to not forget something easily forgotten, for example, in database_manager.py, selectBasicBatterStats() has a commit() statement and so a reminder is given that statments that modify the database must come before this statement in order to take effect.</li>
+        <li>Comments added to explain the "why" behind why certain choices were made or why a section of code exists. See stats_scraper.py _getStatsInRow() that explains that a block of code exists because sometimes columns span over multiple columns.</li>
     </ul>
     <ul>
         <h2> CSS Learning Outcomes </h2>
