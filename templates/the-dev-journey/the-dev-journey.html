@@ -14,25 +14,24 @@
                     <img src="{{url_for('.static', filename='images/dictionary.png')}}" alt="dictionary">
                 </div>
                 <div class="tidbit-header-text">
-                    <h1 class="title"> Using Dictionaries To Remove Need of Switch Statements </h1>
+                    <h1 class="title"> Accounting for Edge Cases </h1>
                     <!-- <p class="linebreak"></p> -->
                     <div class="subtitle">
-                        <p>Example: teamCities = dict([</p>
-                        <p>("Diamondbacks", "Arizona"),</p>
-                        <p>("Braves", "Atlanta"),</p>
-                        <p>("Orioles", "Baltimore"),</p>
-                        <p>("Red Sox", "Boston"),</p>
-                        <p>("Cubs", "Chicago"),</p>
-                        <p>("White Sox", "Chicago")</p>
-                        <p>])</p>
+                        <p>In order to adhere to SQL database restrictions
                     </div>
                 </div>
             </div>
             <p>
-                Inheritance Description 1 Inheritance Description 1 Inheritance Description 1 Inheritance Description 1Inheritance Description 1 Inheritance Description 1 Inheritance Description 1
+                I found out that SQL tables cannot have column headers that start with a number. Thus, the scraper had to detect columns that started with a number and add a leading underscore to them.
             </p>
             <p>
-                Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 
+                Similarily, SQL Tables cannot have 2 or more columns with the same name And so the scraper had to give a different header name to the duplicate column.
+            </p>
+            <p>
+                SQL Tables also cannot disallow certain special characters to be in the column header names so I had to replace certain special characters with its textual form ("_" becomes "underscore").
+            </p>
+            <p>
+                Blank rows had to be removed.
             </p>
         </article>
         <article class="tidbit-tile light-background">
@@ -68,25 +67,23 @@
                     <img src="{{url_for('.static', filename='images/inheritance.png')}}" alt="inheritance">
                 </div>
                 <div class="tidbit-header-text">
-                    <h1 class="title"> Using Inheritance </h1>
+                    <h1 class="title"> Single Responsibility Prinicple and Separation of Concerns (SoC) </h1>
                     <!-- <p class="linebreak"></p> -->
                     <div class="subtitle">
-                        <p>Example: teamCities = dict([</p>
-                        <p>("Diamondbacks", "Arizona"),</p>
-                        <p>("Braves", "Atlanta"),</p>
-                        <p>("Orioles", "Baltimore"),</p>
-                        <p>("Red Sox", "Boston"),</p>
-                        <p>("Cubs", "Chicago"),</p>
-                        <p>("White Sox", "Chicago")</p>
-                        <p>])</p>
+                        <p>Benefits:</p>
+                        <p>Easily Swap Classes in Place of other classes such as when a new framework is used, that performs the same job as the old class,</p>
+                        <p>Easier to debug knowing a class only has a few dependencies because setting up the test environement involves setting up less dependencies,</p>
                     </div>
                 </div>
             </div>
             <p>
-                Inheritance Description 1 Inheritance Description 1 Inheritance Description 1 Inheritance Description 1Inheritance Description 1 Inheritance Description 1 Inheritance Description 1
+                stats_database_utility.py is a "utility" module comprised of only methods and no class (like a static class in java) meaning that no instantiation is needed to use the class (more readable and easier to use). If you want to ALSO keep track of state such as the name of the database, then a "manager" class/module is used (In this case, database_manager.py).
             </p>
             <p>
-                Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 Inheritance Description 2 
+                If many different people want to write their own methods to, for example, import their own data to the database. The "common" code that all those people will use/call in order to make writes and reads to the database is separated from the code that a specific person has in order to write THEIR specific data to the database. 
+            </p>
+            <p>
+                Some people want to make visualizations off of data from a database but other people may want to make that visualization based on a different source of data (an excel sheet rather than a database for instance) and so visualizer_from_database.py and stats_visualizer.py are two separate modules/classes rather than being combined into one.
             </p>
         </article>
         <article class="tidbit-tile light-background">
@@ -110,13 +107,68 @@
             </p>
         </article>
     </div>
-    <h3>  </h3>
     
-    <ul> Other Learning Outcomes of Note 
+    
+    <ul>
+        <h3> Creating custom exceptions for different situations </h3>
+        <p>
+            That way, if database failed to be updated with sports stats (because the stats scraper failed or the updating the database failed), then a certain exception will be thrown and the browser will still try and generate the graph based on the current data in the database. However if that fails (possibly because the required data is not present in the database), then a different exception will be thrown and the browser will say there's been and error and not show the graph. 
+        </p>
+        <br>
+
+        <h3> Taking generic error messages and encapsulating them in custom exceptions with higher-level descriptions/names </h3>
+        <p>
+           When a table with a given table ID is not able to be found from the website you are scraping, a long verbose error message is thrown. But instead of throwing this to the calling code, I instead encapsulate that message in a TableNotFoundException and throw this much more clear and readable exception instead. 
+        </p>
+        <br>
+
+        <h3> Deciding whether certain functionality should rely on hardcoded values or be dynamic </h3>
+        <p>
+            I realized that the tables to be scraped from the baseball reference website were very diverse. Some had columns that were strings (like "name"), others had columns that were ints (like "homeruns"), and others had columns that were floats (like "batting average"). Thus in order to make the code more scalable, I decided to have the scraper detect what data type each column is (because SQL tables require the data type of each column to be specified) So that when you add the data to the sql table, we don't need to hard code the types of each column.
+        </p>
+        <p>
+            I also realized that every team-season combination has their own webpage, but the url links for each are not drastically different from each other. The url is the same but the season in the url and the team name in the url varies. Thus, I have a method that generates the URL based on the parameters given being the team name and season. 
+        </p>
+        <br>
+
+        <h3> Recognizing when to use libraries/modules to make use of already-created methods, instead of wasting time developing them myself </h3>
+        <p>
+            Example: new URLSearchParams() in function getGraphURLParamsToRequestFromServer() of visualizations.js
+        </p>
+        <p>
+            Example when I didn't do this but should have: many of the methods in stats_database_utility.py which generate strings for commands to write to an SQL database, read, etc.
+        </p>
+        <br>
+
+        <h3> DRY Principle </h3>
+        <p>
+            Functions that get the headers from a table on the stats website and functions that get the actual stats from a table all need to retreive that table beautiful soup object before they can get their respective data so this process of getting the table object is it's own separate method. 
+        </p>
+        <br>
+        
         <li>Using Dictionaries to Remove the Need for Switch Statments </li>
         <li>Documented some of the python files with Docstrings </li>
         <li>Using parameter objects (wrapper objects) in place of long lists of arguments in methods </li>
         <li>Using Docstring or python type hints when it is ambiguous as to what the type of an argument is </li>
+        <li>I realized that many different methods in database_manager.py all had the name of the database as an argument passed in and so in order to avoid repetition, I just made the name of the database as an instance variable.</li>
+        <li>Using default args. For example, _getStatsFromTable in stats_scraper.py has an argument posToOmit=[] that allows you to specify position(s) to not get stats for but if you leave it empty, it will get stats for all positions.</li>
+        <li>Using the fetch api to first request and retreive the initial webpage from the server, but then, to use url parameters to request the customized graph to be displayed</li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+    <ul>
+        <h2> CSS Learning Outcomes </h2>
+        <br>
+        <h3>Use of identifying html elements by their class or their id rather than specifying whether an element is a child or not </h3>
+        <p>This is in order to decouple which elements are being identified in the css file from the structure of the html document. This allows the css file to be reused more easily with other html documents because even if that html document is structured differently, as long as the right classes and ids are applied to elements then the webpage should display a similar style.</p>
+        <br>
         <li>Use of css grid to create the layout of the mosaic tiles you see on this page, but used css flexbox to have text within the mosaic tiles stretch to fit the allocated area </li>
     </ul>
 </body>
