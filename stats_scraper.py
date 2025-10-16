@@ -7,6 +7,10 @@ import sys
 import re
 import cloudscraper
 import logging
+import os
+from dotenv import load_dotenv
+load_dotenv()   # loads .env into os.environ
+
 
 class StatsScraper(ABC):
     """A class to gets the stats and data of a sports stat website into data types like lists
@@ -76,8 +80,26 @@ class StatsScraper(ABC):
             "Connection": "keep-alive",
             "Upgrade-Insecure-Requests": "1"
         }
+        
+  
+        PROXY_HOST = os.environ.get("PROXY_HOST")      # e.g. proxy.example.com:8000
+        PROXY_USER = os.environ.get("PROXY_USER")      # or None
+        PROXY_PASS = os.environ.get("PROXY_PASS")      # or None
+
+        def _make_proxies():
+            if PROXY_HOST is None:
+                return None
+            if PROXY_USER and PROXY_PASS:
+                creds = f"{PROXY_USER}:{PROXY_PASS}@"
+            else:
+                creds = ""
+            return {
+                "http":  f"http://{creds}{PROXY_HOST}",
+                "https": f"http://{creds}{PROXY_HOST}",
+            }   
+        proxies = _make_proxies()   
         scraper = cloudscraper.create_scraper()  # handles Cloudflare protection
-        r = scraper.get(url, headers=headers, timeout=10)
+        r = scraper.get(url, headers=headers, timeout=10, proxies=proxies)
 
         # ✅ Logging instead of print
         logging.info(f"_____REQUESTS_____")
