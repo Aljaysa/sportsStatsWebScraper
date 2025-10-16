@@ -95,7 +95,7 @@ class StatsScraper(ABC):
                 creds = ""
             return {
                 "http":  f"http://{creds}{PROXY_HOST}",
-                "https": f"http://{creds}{PROXY_HOST}",
+                "http": f"https://{creds}{PROXY_HOST}",
             }   
         proxies = _make_proxies()   
         scraper = cloudscraper.create_scraper()  # handles Cloudflare protection
