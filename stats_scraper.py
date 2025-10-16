@@ -1,3 +1,4 @@
+import cloudscraper
 import requests
 from bs4 import BeautifulSoup
 import inspect
@@ -62,9 +63,25 @@ class StatsScraper(ABC):
             url (str): url of the webpage to get the html data from
         Returns:
             BeautifulSoup: tree to be traversed of html web elements
-        """        
-        r = requests.get(url)
-        #print(r)
+        """     
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                          "AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/118.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://www.google.com/",
+            "DNT": "1",  # Do Not Track request header
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1"
+        }
+        scraper = cloudscraper.create_scraper()  # handles Cloudflare protection
+        r = scraper.get(url)
+
+        print("_____REQUESTS______: ")
+        print(r)
+        print("Status code:", r.status_code)
+        #r = requests.get(url, headers=headers)
         soup = BeautifulSoup(r.text, "html.parser")
         return soup
     
