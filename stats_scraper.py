@@ -76,11 +76,15 @@ class StatsScraper(ABC):
             "Upgrade-Insecure-Requests": "1"
         }
         scraper = cloudscraper.create_scraper()  # handles Cloudflare protection
-        r = scraper.get(url)
+        r = scraper.get(url, headers=headers, timeout=10)
 
         print("_____REQUESTS______: ")
-        print(r)
-        print("Status code:", r.status_code)
+        print(f"Status code: {r.status_code}")
+        print(f"Request headers sent: {r.request.headers}")
+        print(f"Response snippet: {r.text[:500]}")  # first 500 characters of response
+        if r.status_code != 200:
+            raise Exception(f"Failed to fetch {url}: {r.status_code}")
+
         #r = requests.get(url, headers=headers)
         soup = BeautifulSoup(r.text, "html.parser")
         return soup
