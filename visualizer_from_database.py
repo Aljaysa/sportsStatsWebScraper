@@ -66,7 +66,11 @@ def generateGraphHTMLUsingUpdatedDatabase(databaseFileName, teamName, year, xAxi
     try:
         thisDatabaseManager.uploadTeamBasicBatterStats(teamName, year)
     except Exception as e:
-        raise DatabaseUpdateFailedException() from e
+        try:
+            generateGraphHTML(thisDatabaseManager, graphInfo)
+        except Exception as e:
+            raise GraphGenerationFailedException() from e
+        #raise DatabaseUpdateFailedException() from e
         
     try:
         generateGraphHTML(thisDatabaseManager, graphInfo)
