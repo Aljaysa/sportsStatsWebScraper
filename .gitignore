@@ -30,3 +30,7 @@ build/
 # Temporary files
 *.tmp
 *.swp
+
+#Custom files
+baseballStats.db
+static/embeddedHTML/statsGraphs/
