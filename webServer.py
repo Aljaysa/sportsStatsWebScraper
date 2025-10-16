@@ -33,6 +33,8 @@ def theDevJourney():
 def getVisualizationsGraph():
     if request.method == 'GET':
         try:
+            print("Database path:", databaseName)
+            print("DB file exists:", os.path.exists(databaseName))
             urlArgs = request.args
             visualizer_from_database.generateGraphHTMLUsingUpdatedDatabase(databaseName, teamNameUrlArgFormatToWebServerFormat(urlArgs["team"]), urlArgs["year"], urlArgs["x_axis"],urlArgs["y_axis"], urlArgToGraphTypeBindings[urlArgs["graph_type"]])
             graphFileName = visualizer_from_database.getGraphHTMLFileName(GraphInfo(teamNameUrlArgFormatToWebServerFormat(urlArgs["team"]), urlArgs["year"], urlArgs["x_axis"] ,urlArgs["y_axis"], urlArgToGraphTypeBindings[urlArgs["graph_type"]]))
