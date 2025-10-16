@@ -2,11 +2,16 @@ from flask import Flask, jsonify, request, render_template, send_file
 import visualizer_from_database
 from visualizer_from_database import GraphInfo, GraphType, DatabaseUpdateFailedException
 import traceback
-
+import os
 
 app = Flask(__name__)
 
-databaseName = "baseballStats.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory of this script
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory of this script
+DB_FILENAME = "baseballStats.db"
+databaseName = os.path.join(BASE_DIR, DB_FILENAME)
+#databaseName = "baseballStats.db"
 urlArgToGraphTypeBindings = dict([
     ("scatterplot", GraphType.SCATTERPLOT),
 ])
