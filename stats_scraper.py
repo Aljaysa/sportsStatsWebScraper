@@ -1,4 +1,3 @@
-import cloudscraper
 import requests
 from bs4 import BeautifulSoup
 import inspect
@@ -6,6 +5,8 @@ from abc import ABC, abstractmethod
 from enum import Enum
 import sys
 import re
+import cloudscraper
+import logging
 
 class StatsScraper(ABC):
     """A class to gets the stats and data of a sports stat website into data types like lists
@@ -78,10 +79,11 @@ class StatsScraper(ABC):
         scraper = cloudscraper.create_scraper()  # handles Cloudflare protection
         r = scraper.get(url, headers=headers, timeout=10)
 
-        print("_____REQUESTS______: ")
-        print(f"Status code: {r.status_code}")
-        print(f"Request headers sent: {r.request.headers}")
-        print(f"Response snippet: {r.text[:500]}")  # first 500 characters of response
+        # ✅ Logging instead of print
+        logging.info(f"_____REQUESTS_____")
+        logging.info(f"Status code: {r.status_code}")
+        logging.info(f"Request headers sent: {r.request.headers}")
+        logging.info(f"Response snippet: {r.text[:500]}")  # first 500 chars
         if r.status_code != 200:
             raise Exception(f"Failed to fetch {url}: {r.status_code}")
 
